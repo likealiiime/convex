@@ -29,7 +29,7 @@ module Convex
     end
     
     debug "Booting..."
-    DatumType.load!
+    Convex::DatumType.load!
     debug "Loaded DatumTypes"
   end
   

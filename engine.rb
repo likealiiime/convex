@@ -73,10 +73,10 @@ module Convex
     
     def filter_doc_cats
       response.xpath('/rdf:RDF/rdf:Description[c:category]').each do |node|
-        DatumType.remember('DocCat', node.xpath('./rdf:type')[0]['resource'])
+        Convex::DatumType.remember('DocCat', node.xpath('./rdf:type')[0]['resource'])
         context << Datum.new({
           :value => node.xpath('./c:categoryName')[0].inner_text.to_s,
-          :type => DatumType::DocCat,
+          :type => Convex::DatumType::DocCat,
           :weight => node.xpath('./c:score')[0].inner_text.to_f,
           :calais_ref_uri => node.xpath('./c:category')[0]['resource'].to_s
         }).remember
@@ -88,11 +88,11 @@ module Convex
     
     def filter_social_tags
       response.xpath('/rdf:RDF/rdf:Description[c:socialtag]').each do |node|
-        DatumType.remember('SocialTag', node.xpath('./rdf:type')[0]['resource'])
+        Convex::DatumType.remember('SocialTag', node.xpath('./rdf:type')[0]['resource'])
         importance = node.xpath('./c:importance')[0].inner_text.to_f || 100.0
         context << Datum.new({
           :value => node.xpath('./c:name')[0].inner_text.to_s,
-          :type => DatumType::SocialTag,
+          :type => Convex::DatumType::SocialTag,
           :calais_ref_uri => node.xpath('./c:socialtag')[0]['resource'].to_s,
           :weight => 1.0 / importance
         }).remember
@@ -115,7 +115,7 @@ module Convex
         next if uri.empty?
         Datum.new({
           :value => node.xpath('./c:name')[0].inner_text.to_s,
-          :type => DatumType.remember(uri.split('/').last, uri),
+          :type => Convex::DatumType.remember(uri.split('/').last, uri),
           :calais_ref_uri => node['about']
         }).remember
         node.parent = trash.root
@@ -138,7 +138,7 @@ module Convex
     end
     
     def filter_amounts_from_currencies
-      uris = Datum[DatumType::Currency].collect { |d| d.calais_ref_uri }.join(',')
+      uris = Datum[Convex::DatumType::Currency].collect { |d| d.calais_ref_uri }.join(',')
       #require 'ruby-debug/debugger'
       response.xpath("/rdf:RDF/rdf:Description[c:exact and c:subject and contains(\"#{uris}\", c:subject/@rdf:resource)]").each do |node|
         # Enter data as Currency sub-types. Ex - USD
@@ -147,7 +147,7 @@ module Convex
         amount = node.xpath('./c:exact')[0].inner_text.gsub(/[^\d\.]/,'').to_f
         context << Datum.new({
           :value => amount,
-          :type => DatumType.remember(datum.value, datum.calais_ref_uri)
+          :type => Convex::DatumType.remember(datum.value, datum.calais_ref_uri)
         }).remember
         node.parent = trash.root
       end
@@ -156,12 +156,12 @@ module Convex
     end
       
     def filter_domains_from_urls
-      data.select { |d| d.type == DatumType::URL }.each do |datum|
+      data.select { |d| d.type == Convex::DatumType::URL }.each do |datum|
         # Enter URL domains as separate datum
         uri = URI.parse(datum.value)
         data << Datum.new({
           :value => uri.host,
-          :type => DatumType::URLDomain,
+          :type => Convex::DatumType::URLDomain,
           :weight => datum.weight
         }) if uri.is_a? URI::HTTP
       end
