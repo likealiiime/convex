@@ -54,6 +54,7 @@ module Convex
       Convex.db.sadd(redis_datum_type_index_key, hash)
       Convex.db.setnx(redis_calais_ref_uri_index_key, hash)
       debug "Remembered!" if remembered
+      return self
     end
     
     def debug(message)
