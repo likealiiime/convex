@@ -1,7 +1,6 @@
-require 'convex_application'
+require 'convex'
 
-Convex = ConvexApplication.new :development
-Convex.boot!
+Convex.boot! :development
 
 xml = Nokogiri.XML(DATA)
 trash = Nokogiri::XML::Document.new
