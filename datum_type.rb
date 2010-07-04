@@ -9,6 +9,12 @@ class DatumType
   def to_s; name; end
   def inspect; "#{name}->#{uri}"; end
   
+  def ==(type);
+    DatumType === type && type.name == name
+  end
+  
+  # Class Methods
+  
   def self.redis_prefix; '_datum_type->'; end
   def self.redis_set_prefix; '_datum_types_set'; end
   
@@ -30,7 +36,7 @@ class DatumType
     unless self.knows?(name)
       Convex.db.sadd "#{redis_set_prefix}", name
       Convex.db.setnx "#{redis_prefix}#{name}", uri
-      puts "Remembered and constantized #{name}->#{uri}"
+      Convex.debug "#{name}->#{uri} Remembered and constantized!"
     end
     return DatumType[name]
   end
