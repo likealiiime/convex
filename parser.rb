@@ -1,15 +1,7 @@
-require 'rubygems'
-require 'nokogiri'
-require 'ruby-debug'
-require 'pp'
+require 'convex_application'
 
-require 'extensions'
-require 'database'
-require 'datum_type'
-require 'datum'
-#require 'lenses/chaos'
-
-DatumType.load!
+Convex = ConvexApplication.new :development
+Convex.boot!
 
 xml = Nokogiri.XML(DATA)
 trash = Nokogiri::XML::Document.new
@@ -52,7 +44,6 @@ pp doc_cats
 
 puts "\nBefore entity types, there are #{xml.xpath('//*').count} nodes"
 entity_types = []
-#require 'ruby-debug/debugger'
 xml.xpath('/rdf:RDF/rdf:Description[c:name and rdf:type]').each do |node|
   uri = node.xpath('./rdf:type')[0]['resource'].to_s
   next if uri.empty?
@@ -87,7 +78,6 @@ xml.xpath('/rdf:RDF/rdf:Description[c:docId and rdf:type and c:subject]').each d
   end
 end
 
-require 'ruby-debug/debugger'
 Datum[DatumType::URL].each do |datum|
   # Enter URL domains as separate datum
   uri = URI.parse(datum.value)

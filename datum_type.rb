@@ -15,28 +15,28 @@ class DatumType
   def self.[](name)
     name = name.to_s
     if self.knows?(name)
-      DatumType.new(name, RedisDo.get("#{redis_prefix}#{name}"))
+      DatumType.new(name, Convex.db.get("#{redis_prefix}#{name}"))
     else
       nil
     end
   end
   
   def self.knows?(name)
-    RedisDo.exists "#{redis_prefix}#{name.to_s}"
+    Convex.db.exists "#{redis_prefix}#{name.to_s}"
   end
   
   def self.remember(name, uri='')
     name, uri = name.to_s, uri.to_s
     unless self.knows?(name)
-      RedisDo.sadd "#{redis_set_prefix}", name
-      RedisDo.setnx "#{redis_prefix}#{name}", uri
+      Convex.db.sadd "#{redis_set_prefix}", name
+      Convex.db.setnx "#{redis_prefix}#{name}", uri
       puts "Remembered and constantized #{name}->#{uri}"
     end
     return DatumType[name]
   end
   
   def self.load!
-    RedisDo.smembers(redis_set_prefix).each do |name|
+    Convex.db.smembers(redis_set_prefix).each do |name|
       DatumType[name]
     end
     
