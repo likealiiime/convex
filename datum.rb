@@ -45,7 +45,7 @@ module Convex
     end
   
     def inspect
-      "(#{value}/#{type} #{hash})"
+      "(#{value}/#{type}/#{weight} #{hash})"
     end
     alias_method :to_s, :inspect
     alias_method :log_preamble, :inspect

@@ -2,7 +2,7 @@ module Convex
   class Engine
     include Convex::CustomizedLogging
     
-    attr_reader :db, :trash, :response, :context, :code
+    attr_reader :db, :trash, :response, :context, :code, :subject_uri_index
 
     def initialize
       @code = Convex.next_engine_code
@@ -19,6 +19,7 @@ module Convex
       @trash.root = Nokogiri::XML::Node.new('trash', trash)
       @response = NilEcho
       @context = []
+      @subject_uri_index = {}
       debug "Reset"
     end
     
@@ -40,7 +41,7 @@ module Convex
   
     def focus_from_xml!(xml)
       reset!
-      debug "Focusing..."
+      info "Focusing..."
       @response = Nokogiri.XML(xml)
       debug_count
       
@@ -48,23 +49,17 @@ module Convex
       filter_doc_cats
       filter_social_tags
       filter_subjects
-      #filter_relevances
+      filter_relevances
       filter_amounts_from_currencies
       filter_domains_from_urls
       
-      debug "...Done Focusing!"
-    end
-    
-    def each_datum_and_instance_info_node
-      response.xpath('/rdf:RDF/rdf:Description[c:docId and rdf:type and c:subject]').each do |node|
-        datum = Datum[node.xpath('./c:subject')[0]['resource'].to_s]
-        yield datum, node
-      end
+      info "...Done Focusing!"
     end
     
     private
 
     def remove_response_headers
+      log_newline
       debug "Removing headers..."
       headers = response.xpath('/rdf:RDF/rdf:Description[@c:calaisRequestID and @c:id]') |
                 response.xpath('/rdf:RDF/rdf:Description[@c:emVer]') |
@@ -74,7 +69,8 @@ module Convex
     end
     
     def filter_doc_cats
-      debug "Filtering... DocCats"
+      log_newline
+      debug "Filtering DocCats..."
       response.xpath('/rdf:RDF/rdf:Description[c:category]').each do |node|
         Convex::DatumType.remember('DocCat', node.xpath('./rdf:type')[0]['resource'])
         context << Datum.new({
@@ -89,6 +85,8 @@ module Convex
     end
     
     def filter_social_tags
+      log_newline
+      debug "Filtering SocialTags..."
       response.xpath('/rdf:RDF/rdf:Description[c:socialtag]').each do |node|
         Convex::DatumType.remember('SocialTag', node.xpath('./rdf:type')[0]['resource'])
         importance = node.xpath('./c:importance')[0].inner_text.to_f || 100.0
@@ -100,12 +98,12 @@ module Convex
         }).remember
         node.parent = trash.root
       end
-      debug "Filtered SocialTags"
       debug_count
     end
     
     def filter_subjects
-      debug "Filtering Entities..."
+      log_newline
+      debug "Filtering Subjects..."
       # <rdf:Description rdf:about="http://d.opencalais.com/genericHasher-1/736a403d-157b-3e80-86a7-acc404607cb2">
       #  <rdf:type rdf:resource="http://s.opencalais.com/1/type/em/e/Currency"/>
       #  <c:name>USD</c:name>
@@ -122,18 +120,23 @@ module Convex
           :calais_ref_uri => node['about']
         }).remember
         context << datum if datum.type.name == 'URL'
+        subject_uri_index[node['about']] = datum if node['about']
         node.parent = trash.root
       end
       debug_count
     end
     
     def filter_relevances
+      log_newline
       debug "Filtering Relevances..."
-      each_datum_and_instance_info_node do |datum, node|
+      response.xpath("/rdf:RDF/rdf:Description[c:subject and c:relevance]").each do |node|
         relevance_node = node.xpath('./c:relevance')[0]
-        unless relevance_node.nil?
+        uri = node.xpath('./c:subject')[0]['resource'].to_s        
+        unless relevance_node.nil? || uri.empty?
           # Update weights of entity types
+          datum = subject_uri_index[uri]
           datum.weight = relevance_node.inner_text.to_f
+          debug "#{datum.value} now weighs #{datum.weight}"
           node.parent = trash.root
         end
       end
@@ -141,9 +144,9 @@ module Convex
     end
     
     def filter_amounts_from_currencies
+      log_newline
       debug "Filtering amounts from currencies..."
       uris = Datum[Convex::DatumType::Currency].collect { |d| d.calais_ref_uri }.join(',')
-      #require 'ruby-debug/debugger'
       response.xpath("/rdf:RDF/rdf:Description[c:exact and c:subject and contains(\"#{uris}\", c:subject/@rdf:resource)]").each do |node|
         # Enter data as Currency sub-types. Ex - USD
         uri = node.xpath('./c:subject')[0]['resource'].to_s
@@ -159,6 +162,7 @@ module Convex
     end
       
     def filter_domains_from_urls
+      log_newline
       debug "Filtering domains from URLs..."
       context.select { |d| d.type == Convex::DatumType::URL }.each do |datum|
         # Enter URL domains as separate datum
