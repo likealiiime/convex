@@ -15,22 +15,23 @@ module Convex
   def self.env; @@env; end
   def self.db; @@db; end
   
-  def self.boot!(stage = :development)
-    @@env = Convex::Environment.new(stage)
-    @@filters = []
+  def self.boot!(mode = :development)
+    @@env = Convex::Environment.new(mode)
+    
+    info "Starting Convex in #{env.mode.to_s.upcase} mode..."
     @@db = Redis.new
     debug "Connected to Redis"
     @@db.select env.code
-    debug "Selected #{env.stage} environment, code #{env.code}"
+    debug "SELECTed #{env.mode} database, code #{env.code}"
     @@db.setnx '_lachesis', 0
-    if env.testing?
-      debug "Performing FLUSHDB"
+    if env.forgetful?
+      warn "Performing FLUSHDB"
       @@db.flushdb
     end
     
     debug "Booting..."
     Convex::DatumType.load!
-    debug "Loaded DatumTypes"
+    info "Loaded DatumTypes"
   end
   
   def self.next_engine_code
@@ -40,9 +41,18 @@ module Convex
   def self.debug(message)
     puts "--- " << message.to_s if env.development?
   end
+  def self.info(message)
+    puts "+++ " << message.to_s
+  end
+  def self.warn(message)
+    puts "!!! " << message.to_s
+  end
+  def self.error(message)
+    puts "/!\\ " << message.to_s
+  end
   
   def self.nid
-    Convex.db.incr '_lachesis'
+    Convex.db.incr('_lachesis').to_i
   end
   def self.cid
     Convex.db.get '_lachesis'
@@ -54,15 +64,15 @@ end
 
 module Convex
   class Environment
-    attr_accessor :stage
-    def initialize(stage)
-      @stage = stage.to_sym
+    attr_accessor :mode
+    def initialize(mode)
+      @mode = mode.to_sym
     end
     def code
-      [:development, :testing].index(stage)
+      [:development, :forgetful].index(mode)
     end
-    def development?; stage == :development || stage == :testing; end
-    def testing?; stage == :testing; end
+    def development?; mode == :development || mode == :forgetful; end
+    def forgetful?; mode == :forgetful; end
   end
 end
 

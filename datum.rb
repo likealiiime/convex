@@ -2,6 +2,8 @@ require 'digest/sha1'
 
 module Convex
   class Datum
+    include Convex::CustomizedLogging
+    
     ATTRIBUTES = [:value, :created_at, :calais_ref_uri, :type, :weight]
     attr_accessor :weight
     attr_reader   :type, :value, :created_at, :calais_ref_uri, :id
@@ -46,20 +48,18 @@ module Convex
       "(#{value}/#{type} #{hash})"
     end
     alias_method :to_s, :inspect
-  
+    alias_method :log_preamble, :inspect
+    
     def remember
       remembered = Convex.db.hsetnx(redis_hash_key, :value, value)
       remembered &&= Convex.db.hsetnx(redis_hash_key, :type, type)
       remembered &&= Convex.db.hsetnx(redis_hash_key, :calais_ref_uri, calais_ref_uri)
       Convex.db.sadd(redis_datum_type_index_key, hash)
       Convex.db.setnx(redis_calais_ref_uri_index_key, hash)
-      debug "Remembered!" if remembered
+      info "Remembered!" if remembered
       return self
     end
     
-    def debug(message)
-      Convex.debug("#{self}: " << message.to_s)
-    end
     
     def self.[](param)
       if DatumType === param

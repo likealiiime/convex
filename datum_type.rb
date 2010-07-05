@@ -37,7 +37,7 @@ module Convex
       unless self.knows?(name)
         Convex.db.sadd "#{redis_set_prefix}", name
         Convex.db.setnx "#{redis_prefix}#{name}", uri
-        Convex.debug "#{name}->#{uri} Remembered and constantized!"
+        Convex.info "#{name}->#{uri} Remembered and constantized!"
       end
       return DatumType[name]
     end

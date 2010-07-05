@@ -1,14 +1,16 @@
 module Convex
   class Engine
+    include Convex::CustomizedLogging
+    
     attr_reader :db, :trash, :response, :context, :code
 
     def initialize
       @code = Convex.next_engine_code
-      debug "Hello, world!"
+      info "Hello, world!"
       @db = Redis.new
       debug "Connected to Redis"
       @db.select Convex.env.code
-      debug "Selected #{Convex.env.stage} environment, code #{Convex.env.code}"
+      debug "SELECTed #{Convex.env.mode} database, code #{Convex.env.code}"
       reset!
     end
     
@@ -20,10 +22,10 @@ module Convex
       debug "Reset"
     end
     
-    def debug(message)
-      Convex.debug("Engine #{code}: " << message.to_s)
-    end
-  
+    def inspect; "Engine #{code}"; end
+    alias_method :to_s, :inspect
+    alias_method :log_preamble, :inspect
+    
     def focus!(text)
       reset!
       # Send to Calais

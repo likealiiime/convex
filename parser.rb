@@ -1,6 +1,6 @@
 require 'convex'
 
-Convex.boot! :testing
+Convex.boot! :forgetful
 EngineA = Convex::Engine.new
 EngineA.focus_from_xml! DATA
 

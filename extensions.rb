@@ -1,3 +1,12 @@
+module Convex
+  module CustomizedLogging
+    def log_preamble; ''; end
+    %w(debug info warn error).each do |level|
+      class_eval "def #{level}(message); Convex.#{level}(log_preamble.to_s << ': ' << message.to_s); end"
+    end
+  end
+end
+
 class NilEcho < NilClass
   def self.method_missing(symbol, *args);
     # TODO Check symbol to see if it ends with ?
