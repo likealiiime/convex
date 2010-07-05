@@ -1,12 +1,3 @@
-module Convex
-  module CustomizedLogging
-    def log_preamble; ''; end
-    %w(debug info warn error).each do |level|
-      class_eval "def #{level}(message); Convex.#{level}(log_preamble.to_s << ': ' << message.to_s); end"
-    end
-  end
-end
-
 class NilEcho < NilClass
   def self.method_missing(symbol, *args);
     # TODO Check symbol to see if it ends with ?
@@ -17,12 +8,17 @@ class NilEcho < NilClass
   def self.to_f; 0.0; end
   def self.to_s; ''; end
   def self.nil?; true; end
+  def self.not_nil?; false; end
   
   def method_missing(symbol, *args); return self; end
   def to_i; 0; end
   def to_f; 0.0; end
   def to_s; ''; end
   def nil?; true; end
+end
+
+class NilClass
+  def not_nil?; false; end
 end
 
 module Nokogiri

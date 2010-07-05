@@ -4,13 +4,15 @@ require 'nokogiri'
 require 'ruby-debug'
 require 'pp'
 
+require 'logging'
 require 'extensions'
-
 require 'engine'
 require 'datum_type'
 require 'datum'
    
 module Convex
+  extend Convex::Logging
+  
   @@next_engine_code = nil
   def self.env; @@env; end
   def self.db; @@db; end
@@ -18,7 +20,7 @@ module Convex
   def self.boot!(mode = :development)
     @@env = Convex::Environment.new(mode)
     
-    info "Starting Convex in #{env.mode.to_s.upcase} mode..."
+    Convex.info "Starting Convex in #{env.mode.to_s.upcase} mode..."
     @@db = Redis.new
     debug "Connected to Redis"
     @@db.select env.code
@@ -32,23 +34,11 @@ module Convex
     debug "Booting..."
     Convex::DatumType.load!
     info "Loaded DatumTypes"
+    log_newline
   end
   
   def self.next_engine_code
     @@next_engine_code = @@next_engine_code.nil? ? 'A' : @@next_engine_code.succ
-  end
-  
-  def self.debug(message)
-    puts "--- " << message.to_s if env.development?
-  end
-  def self.info(message)
-    puts "+++ " << message.to_s
-  end
-  def self.warn(message)
-    puts "!!! " << message.to_s
-  end
-  def self.error(message)
-    puts "/!\\ " << message.to_s
   end
   
   def self.nid
