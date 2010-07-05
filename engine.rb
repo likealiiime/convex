@@ -11,6 +11,7 @@ module Convex
       debug "Connected to Redis"
       @db.select Convex.env.code
       debug "SELECTed #{Convex.env.mode} database, code #{Convex.env.code}"
+      @calais = Convex::CalaisService.new
       reset!
     end
     
@@ -29,19 +30,16 @@ module Convex
     
     def focus!(text)
       reset!
-      # Send to Calais
-      text = text.to_s
-      # Receive XML
-      @response = Nokogiri.XML(DATA)
+      focus_using_xml(@calais.analyze(text))
     end
   
     def debug_count
       debug "#{context.count} datum in context, #{@response.xpath('//*').count} nodes left"
     end
   
-    def focus_from_xml!(xml)
-      reset!
-      info "Focusing..."
+    def focus_using_xml(xml)
+      xml = xml.to_s
+      info "Focusing %.1fKB of XML..." % (xml.length.to_f / 1024.0)
       @response = Nokogiri.XML(xml)
       debug_count
       

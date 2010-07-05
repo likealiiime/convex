@@ -6,6 +6,7 @@ require 'pp'
 
 require 'logging'
 require 'extensions'
+require 'calais_service'
 require 'engine'
 require 'datum_type'
 require 'datum'
