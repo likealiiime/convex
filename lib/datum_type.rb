@@ -16,8 +16,8 @@ module Convex
   
     # Class Methods
   
-    def self.redis_prefix; '_datum_type->'; end
-    def self.redis_set_prefix; '_datum_types_set'; end
+    def self.redis_prefix; 'datum_type->'; end
+    def self.redis_set_key; 'datum_type_set'; end
   
     def self.[](name)
       name = name.to_s
@@ -35,7 +35,7 @@ module Convex
     def self.remember(name, uri='')
       name, uri = name.to_s, uri.to_s
       unless self.knows?(name)
-        Convex.db.sadd "#{redis_set_prefix}", name
+        Convex.db.sadd redis_set_key, name
         Convex.db.setnx "#{redis_prefix}#{name}", uri
         Convex.info "#{name}->#{uri} Remembered and constantized!"
       end
@@ -43,7 +43,7 @@ module Convex
     end
   
     def self.load!
-      Convex.db.smembers(redis_set_prefix).each do |name|
+      Convex.db.smembers(redis_set_key).each do |name|
         DatumType[name]
       end
     

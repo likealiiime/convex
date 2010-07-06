@@ -9,14 +9,14 @@ module Convex
     attr_reader   :type, :value, :created_at, :calais_ref_uri, :id
   
     def self.redis_datum_type_index_prefix
-      "datum_type-datum-index->"
+      "datum_index-datum_type->"
     end
     def redis_datum_type_index_key
       "#{self.class.redis_datum_type_index_prefix}#{type.name}"
     end
     # Calais Ref URIs are unique!
     def self.redis_calais_ref_uri_index_prefix
-      "calais_ref_uri-datum-index->"
+      "datum_index-calais_ref_uri->"
     end
     def redis_calais_ref_uri_index_key
       "#{self.class.redis_calais_ref_uri_index_prefix}#{calais_ref_uri}"
