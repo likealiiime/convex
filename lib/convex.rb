@@ -1,14 +1,9 @@
-# Ruby libraries
-require 'cgi'
-require 'net/http'
-require 'uri'
-require 'pp'
-
 # 3rd-party gems
 require 'rubygems'
 require 'ruby-debug'
 require 'redis'
 require 'nokogiri'
+require 'json/ext'
 
 # Convex libraries
 require 'lib/logging'
@@ -81,11 +76,3 @@ module Convex
     def forgetful?; mode == :forgetful; end
   end
 end
-
-names = <<REDIS
-lens-type->id attribute
-
-chaos-datum->sdfdf0sdfsdofim value
-phanes-datum->asdofmsodifmsd value
-chronos-datum->asdfasdfsolmd value
-REDIS
