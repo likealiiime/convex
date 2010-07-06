@@ -1,3 +1,7 @@
+require 'cgi'
+require 'net/http'
+require 'uri'
+
 module Convex
   class CalaisService
     include Convex::CustomizedLogging
