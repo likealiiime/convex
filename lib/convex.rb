@@ -17,16 +17,20 @@ require 'lib/calais_service'
 require 'lib/engine'
 require 'lib/datum_type'
 require 'lib/datum'
-   
+require 'lib/lens'
+
 module Convex
   extend Convex::Logging
   
   @@next_engine_code = nil
+  
+  def self.lenses; @@lenses; end
   def self.env; @@env; end
   def self.db; @@db; end
   
   def self.boot!(mode = :development)
     @@env = Convex::Environment.new(mode)
+    @@lenses = []
     
     Convex.info "Starting Convex in #{env.mode.to_s.upcase} mode..."
     @@db = Redis.new
@@ -47,6 +51,10 @@ module Convex
   
   def self.next_engine_code
     @@next_engine_code = @@next_engine_code.nil? ? 'A' : @@next_engine_code.succ
+  end
+  
+  def self.<<(*lenses)
+    @@lenses |= lenses
   end
   
   def self.nid

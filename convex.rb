@@ -1,6 +1,9 @@
 require 'lib/convex'
+require 'lenses/chronos'
 
 Convex.boot! :forgetful
+Convex << Convex::Lenses::ChronosLens
+
 EngineA = Convex::Engine.new
 EngineA.focus! DATA.read
 

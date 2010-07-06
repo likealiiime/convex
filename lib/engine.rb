@@ -2,7 +2,8 @@ module Convex
   class Engine
     include Convex::CustomizedLogging
     
-    attr_reader :db, :trash, :response, :context, :code, :subject_uri_index
+    attr_reader   :db, :trash, :response, :context, :code, :subject_uri_index
+    attr_accessor :lenses
 
     def initialize
       @code = Convex.next_engine_code
@@ -12,6 +13,7 @@ module Convex
       @db.select Convex.env.code
       debug "SELECTed #{Convex.env.mode} database, code #{Convex.env.code}"
       @calais = Convex::CalaisService.new
+      @lenses = []
       reset!
     end
     
@@ -51,7 +53,8 @@ module Convex
       filter_amounts_from_currencies
       filter_domains_from_urls
       
-      info "...Done Focusing!"
+      info "...Done Focusing! Sending to Lenses..."
+      Convex.lenses.each { |lens| lens.focus_using_data!(context, self) }
     end
     
     private
