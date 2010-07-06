@@ -45,7 +45,7 @@ module Convex
     end
   
     def inspect
-      "(#{value}/#{type}/#{weight} #{hash})"
+      "(#{value}/#{type}/#{weight} #{hash}#{' #'+id.to_s if id})"
     end
     alias_method :to_s, :inspect
     alias_method :log_preamble, :inspect
@@ -60,31 +60,27 @@ module Convex
       return self
     end
     
+    def self.for_hash(hash)
+      key = "datum->#{hash}"
+      return Datum.new({
+        :value => Convex.db.hget(key, :value),
+        :type => Convex.db.hget(key, :type),
+        :calais_ref_uri => Convex.db.hget(key, :calais_ref_uri)
+      })
+    end
     
     def self.[](param)
       if DatumType === param
         hashes = Convex.db.smembers "#{redis_datum_type_index_prefix}#{param.name}"
-        return hashes.collect { |hash|
-          key = "datum->#{hash}"
-          Datum.new({
-            :value => Convex.db.hget(key, :value),
-            :type => Convex.db.hget(key, :type),
-            :calais_ref_uri => Convex.db.hget(key, :calais_ref_uri)
-          })
-        }
+        hashes.collect { |hash| Datum.for_hash(hash) }
+      elsif String === param && param[0..6] == 'http://'
+        Datum.for_hash(Convex.db.get("#{redis_calais_ref_uri_index_prefix}#{param}"))
       elsif String === param
-        hash = Convex.db.get "#{redis_calais_ref_uri_index_prefix}#{param}"
-        key = "datum->#{hash}"
-        return Datum.new({
-          :value => Convex.db.hget(key, :value),
-          :type => Convex.db.hget(key, :type),
-          :calais_ref_uri => Convex.db.hget(key, :calais_ref_uri)
-        })
-      elsif Fixnum === param
-        #Convex.db.hget(redis_hash_prefix, a)
+        Datum.for_hash(param)
       else
         nil
-      end
+      end #if
     end
+    
   end
 end
