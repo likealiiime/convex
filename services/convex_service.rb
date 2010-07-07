@@ -5,7 +5,7 @@ require 'lenses/chronos'
 module Convex
   module ConvexService
     extend Convex::CustomizedLogging
-    CLEARED_ADDRESSES = []
+    CLEARED_ADDRESSES = ['127.0.0.1']
     
     def self.log_preamble; "ConvexService"; end
     
@@ -14,8 +14,8 @@ module Convex
     end
       
     def receive_data(data)
-      Convex::Engine.new.focus! data
       close_connection
+      Convex::Engine.new.focus! data
     end
     
     def unbind
