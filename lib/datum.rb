@@ -45,7 +45,7 @@ module Convex
       {
         'json_class' => self.class.name,
         'attributes' => attributes
-      }.to_json
+      }.to_json(*args)
     end
     
     def self.json_create(object)
