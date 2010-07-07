@@ -1,6 +1,7 @@
 # 3rd-party gems
 require 'rubygems'
 require 'ruby-debug'
+require 'pp'
 require 'redis'
 require 'nokogiri'
 require 'json/ext' # This is the C version; much faster!

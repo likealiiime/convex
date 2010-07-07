@@ -20,6 +20,7 @@ module Convex
     def reset!
       @trash = Nokogiri::XML::Document.new
       @trash.root = Nokogiri::XML::Node.new('trash', trash)
+      @response_body = nil
       @response = NilEcho
       @context = []
       @subject_uri_index = {}
@@ -31,19 +32,17 @@ module Convex
     alias_method :to_s, :inspect
     alias_method :log_preamble, :inspect
     
-    def focus!(text)
-      reset!
-      focus_using_xml(@calais.analyze(text))
-    end
-  
     def debug_count
       debug "#{context.count} datum in context, #{@response.xpath('//*').count} nodes left"
     end
   
-    def focus_using_xml(xml)
-      xml = xml.to_s
-      info "Focusing %.1fKB of XML..." % (xml.length.to_f / 1024.0)
-      @response = Nokogiri.XML(xml)
+    def focus!(text)
+      reset!
+      @response_body = @calais.analyze(text).to_s
+      write_last_response
+      info "Focusing %.1fKB of XML..." % (@response_body.length.to_f / 1024.0)
+      
+      @response = Nokogiri.XML(@response_body)
       debug_count
       
       remove_response_headers
@@ -66,6 +65,12 @@ module Convex
     
     private
 
+    def write_last_response
+      File.open(File.join(Convex::TMP_PATH, "engine-#{code}_last-response.xml"), 'w') { |f|
+        f.write @response
+      }
+    end
+    
     def new_and_indexed_datum(config)
       datum = Datum.new(config)
       @datum_type_index[datum.type] ||= []
@@ -129,13 +134,18 @@ module Convex
       response.xpath('/rdf:RDF/rdf:Description[c:name and rdf:type]').each do |node|
         uri = node.xpath('./rdf:type')[0]['resource'].to_s
         next if uri.empty?
+        new_type = uri.split('/').last
+        unless Convex::DatumType.knows? new_type
+          #mail it
+        end
         datum = new_and_indexed_datum({
           :value => node.xpath('./c:name')[0].inner_text.to_s,
-          :type => Convex::DatumType.remember(uri.split('/').last, uri),
+          :type => Convex::DatumType.remember(new_type, uri),
           :calais_ref_uri => node['about']
         })
+        context << datum
         # URLs are a subject that also count as contextual data
-        context << datum if datum.type.name == 'URL'
+        #context << datum if datum.type.name == 'URL'
         subject_uri_index[node['about']] = datum if node['about']
         node.parent = trash.root
       end
