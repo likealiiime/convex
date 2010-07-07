@@ -50,11 +50,17 @@ module Convex
       filter_social_tags
       filter_subjects
       filter_relevances
-      filter_amounts_from_currencies
-      filter_domains_from_urls
+      filter_amounts_from_currencies if Convex::DatumType.knows? 'Currency'
+      filter_domains_from_urls if Convex::DatumType.knows? 'URL'
       
       info "...Done Focusing! Sending to Lenses..."
       Convex.lenses.each { |lens| lens.focus_using_data!(context, self) }
+      return context
+    rescue Exception => e
+      error "Exception caught: #{e.inspect} in #{e.backtrace.first}"
+      error "Focusing has been abandoned with #{context.count} datum in context, #{@response.xpath('//*').count} nodes left"
+      debug e.backtrace.join("\n")
+      return context
     end
     
     private
