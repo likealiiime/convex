@@ -4,61 +4,27 @@ module Convex
   class Datum
     include Convex::CustomizedLogging
     
-    ATTRIBUTES = [:value, :created_at, :calais_ref_uri, :type, :weight]
-    attr_accessor :weight
+    ATTRIBUTES = [:value, :created_at, :calais_ref_uri, :type, :weight, :id]
     attr_reader   :type, :value, :created_at, :calais_ref_uri, :id
-  
-    def self.redis_datum_type_index_prefix
-      "datum_index-datum_type->"
-    end
-    def redis_datum_type_index_key
-      "#{self.class.redis_datum_type_index_prefix}#{type.name}"
-    end
-    # Calais Ref URIs are unique!
-    def self.redis_calais_ref_uri_index_prefix
-      "datum_index-calais_ref_uri->"
-    end
-    def redis_calais_ref_uri_index_key
-      "#{self.class.redis_calais_ref_uri_index_prefix}#{calais_ref_uri}"
-    end
-    def redis_hash_key
-      "datum->#{hash}"
-    end
-  
-    def hash
-      Digest::SHA1.hexdigest("#{value}+++#{type}+++#{calais_ref_uri}")
-    end
-    
-    @@calais_ref_uri_map = {}
-    @@datum_type_map = {}
-  
+    attr_accessor :weight
+
     def initialize(configuration)
-      @id = Convex.nid
       configuration = {
+        :id => Convex.nid,
         :created_at => Time.now,
         :weight => 0.0,
         :type => DatumType::NoType
       }.merge(configuration)
       ATTRIBUTES.each { |attribute|
-        instance_variable_set("@#{attribute}".to_sym, configuration[attribute])
+        instance_variable_set("@#{attribute}".to_sym, configuration[attribute.to_sym])
       }
     end
   
     def inspect
-      "(#{value}/#{type}/#{weight} #{hash}#{' #'+id.to_s if id})"
+      "(#{value}/#{type}/#{weight} #{' #'+id.to_s if id})"
     end
     alias_method :to_s, :inspect
     alias_method :log_preamble, :inspect
-    
-    def remember
-      remembered = Convex.db.hsetnx(redis_hash_key, :value, value)
-      remembered &&= Convex.db.hsetnx(redis_hash_key, :type, type)
-      remembered &&= Convex.db.hsetnx(redis_hash_key, :calais_ref_uri, calais_ref_uri)
-      Convex.db.sadd(redis_datum_type_index_key, hash)
-      Convex.db.setnx(redis_calais_ref_uri_index_key, hash)
-      info "Remembered!" if remembered
-      return self
-    end
     
     def self.for_hash(hash)
       key = "datum->#{hash}"
@@ -69,18 +35,21 @@ module Convex
       })
     end
     
-    def self.[](param)
-      if DatumType === param
-        hashes = Convex.db.smembers "#{redis_datum_type_index_prefix}#{param.name}"
-        hashes.collect { |hash| Datum.for_hash(hash) }
-      elsif String === param && param[0..6] == 'http://'
-        Datum.for_hash(Convex.db.get("#{redis_calais_ref_uri_index_prefix}#{param}"))
-      elsif String === param
-        Datum.for_hash(param)
-      else
-        nil
-      end #if
+    def attributes
+      attrs = {}
+      ATTRIBUTES.each { |a| attrs[a] = self.send(a.to_sym) }
+      return attrs
     end
     
+    def to_json(*args)
+      {
+        'json_class' => self.class.name,
+        'attributes' => attributes
+      }.to_json
+    end
+    
+    def self.json_create(object)
+      return self.new(object['attributes'])
+    end
   end
 end

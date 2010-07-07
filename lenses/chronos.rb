@@ -5,19 +5,21 @@ module Convex
     class ChronosLens < Convex::Lens
       extend Convex::CustomizedLogging
       
-      PERIODS = [:hourly, :daily, :weekly, :monthly, :yearly]
+      PERIODS = [:life, :hourly, :daily, :weekly, :monthly, :yearly, :death]
       
       def self.is_valid_period?(time)
         PERIODS.include?(time.to_sym)
       end
       def self.log_preamble; 'ChronosLens'; end
       def self.redis_key_for_list(time); "lens-chronos-#{time.to_s}_index"; end
-      
+
       def self.focus_using_data!(data, engine)
         log_newline
         data.each do |datum|
           datum.created_at = Time.now if datum.created_at.nil?
-          engine.db.lpush redis_key_for_list(:hourly), datum.hash
+          json = JSON.generate(datum)
+          engine.db.lpush redis_key_for_list(:hourly), json
+          engine.db.lpush redis_key_for_list(:life), json
           #debug "[HOURLY] LPUSHed #{datum.hash}"
         end
         info "[HOURLY] LPUSHed #{data.count} data"
@@ -43,7 +45,7 @@ module Convex
         data = []
         length = Convex.db.llen(key)
         length.times do |i|
-          data << Datum[Convex.db.lindex(key, i)]
+          data << JSON.parse(Convex.db.lindex(key, i))
           #debug "#{i}: #{Datum[Convex.db.lindex(key,i)]}"
         end
         return data

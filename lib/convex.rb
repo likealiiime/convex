@@ -3,7 +3,7 @@ require 'rubygems'
 require 'ruby-debug'
 require 'redis'
 require 'nokogiri'
-require 'json/ext'
+require 'json/ext' # This is the C version; much faster!
 
 # Convex libraries
 require 'lib/logging'

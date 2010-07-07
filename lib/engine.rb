@@ -2,7 +2,8 @@ module Convex
   class Engine
     include Convex::CustomizedLogging
     
-    attr_reader   :db, :trash, :response, :context, :code, :subject_uri_index
+    attr_reader   :db, :trash, :response, :context, :code
+    attr_reader   :subject_uri_index, :calais_ref_uri_index, :datum_type_index
     attr_accessor :lenses
 
     def initialize
@@ -13,7 +14,6 @@ module Convex
       @db.select Convex.env.code
       debug "SELECTed #{Convex.env.mode} database, code #{Convex.env.code}"
       @calais = Convex::CalaisService.new
-      @lenses = []
       reset!
     end
     
@@ -23,7 +23,8 @@ module Convex
       @response = NilEcho
       @context = []
       @subject_uri_index = {}
-      debug "Reset"
+      @calais_ref_uri_index = {}
+      @datum_type_index = {}
     end
     
     def inspect; "Engine #{code}"; end
@@ -65,6 +66,13 @@ module Convex
     
     private
 
+    def new_and_indexed_datum(config)
+      datum = Datum.new(config)
+      @datum_type_index[datum.type] ||= []
+      @datum_type_index[datum.type] << datum
+      return datum
+    end
+    
     def remove_response_headers
       log_newline
       debug "Removing headers..."
@@ -80,12 +88,12 @@ module Convex
       debug "Filtering DocCats..."
       response.xpath('/rdf:RDF/rdf:Description[c:category]').each do |node|
         Convex::DatumType.remember('DocCat', node.xpath('./rdf:type')[0]['resource'])
-        context << Datum.new({
+        context << new_and_indexed_datum({
           :value => node.xpath('./c:categoryName')[0].inner_text.to_s,
           :type => Convex::DatumType::DocCat,
           :weight => node.xpath('./c:score')[0].inner_text.to_f,
           :calais_ref_uri => node.xpath('./c:category')[0]['resource'].to_s
-        }).remember
+        })
         node.parent = trash.root
       end
       debug_count
@@ -97,12 +105,12 @@ module Convex
       response.xpath('/rdf:RDF/rdf:Description[c:socialtag]').each do |node|
         Convex::DatumType.remember('SocialTag', node.xpath('./rdf:type')[0]['resource'])
         importance = node.xpath('./c:importance')[0].inner_text.to_f || 100.0
-        context << Datum.new({
+        context << new_and_indexed_datum({
           :value => node.xpath('./c:name')[0].inner_text.to_s,
           :type => Convex::DatumType::SocialTag,
           :calais_ref_uri => node.xpath('./c:socialtag')[0]['resource'].to_s,
           :weight => 1.0 / importance
-        }).remember
+        })
         node.parent = trash.root
       end
       debug_count
@@ -121,11 +129,12 @@ module Convex
       response.xpath('/rdf:RDF/rdf:Description[c:name and rdf:type]').each do |node|
         uri = node.xpath('./rdf:type')[0]['resource'].to_s
         next if uri.empty?
-        datum = Datum.new({
+        datum = new_and_indexed_datum({
           :value => node.xpath('./c:name')[0].inner_text.to_s,
           :type => Convex::DatumType.remember(uri.split('/').last, uri),
           :calais_ref_uri => node['about']
-        }).remember
+        })
+        # URLs are a subject that also count as contextual data
         context << datum if datum.type.name == 'URL'
         subject_uri_index[node['about']] = datum if node['about']
         node.parent = trash.root
@@ -138,10 +147,10 @@ module Convex
       debug "Filtering Relevances..."
       response.xpath("/rdf:RDF/rdf:Description[c:subject and c:relevance]").each do |node|
         relevance_node = node.xpath('./c:relevance')[0]
-        uri = node.xpath('./c:subject')[0]['resource'].to_s        
-        unless relevance_node.nil? || uri.empty?
+        subject_uri = node.xpath('./c:subject')[0]['resource'].to_s        
+        unless relevance_node.nil? || subject_uri.empty?
           # Update weights of entity types
-          datum = subject_uri_index[uri]
+          datum = subject_uri_index[subject_uri]
           datum.weight = relevance_node.inner_text.to_f
           debug "#{datum.value} now weighs #{datum.weight}"
           node.parent = trash.root
@@ -153,16 +162,16 @@ module Convex
     def filter_amounts_from_currencies
       log_newline
       debug "Filtering amounts from currencies..."
-      uris = Datum[Convex::DatumType::Currency].collect { |d| d.calais_ref_uri }.join(',')
+      uris = @datum_type_index[Convex::DatumType::Currency].collect { |d| d.calais_ref_uri }.join(',')
       response.xpath("/rdf:RDF/rdf:Description[c:exact and c:subject and contains(\"#{uris}\", c:subject/@rdf:resource)]").each do |node|
         # Enter data as Currency sub-types. Ex - USD
-        uri = node.xpath('./c:subject')[0]['resource'].to_s
-        datum = Datum[uri]
+        subject_uri = node.xpath('./c:subject')[0]['resource'].to_s
+        datum = @subject_uri_index[subject_uri]
         amount = node.xpath('./c:exact')[0].inner_text.gsub(/[^\d\.]/,'').to_f
-        context << Datum.new({
+        context << new_and_indexed_datum({
           :value => amount,
           :type => Convex::DatumType.remember(datum.value, datum.calais_ref_uri)
-        }).remember
+        })
         node.parent = trash.root
       end
       debug_count
@@ -174,7 +183,7 @@ module Convex
       context.select { |d| d.type == Convex::DatumType::URL }.each do |datum|
         # Enter URL domains as separate datum
         uri = URI.parse(datum.value)
-        context << Datum.new({
+        context << new_and_indexed_datum({
           :value => uri.host,
           :type => Convex::DatumType::CXURLDomain,
           :weight => datum.weight
