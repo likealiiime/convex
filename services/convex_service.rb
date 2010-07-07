@@ -5,6 +5,7 @@ require 'lenses/chronos'
 module Convex
   module ConvexService
     extend Convex::CustomizedLogging
+    CLEARED_ADDRESSES = []
     
     def self.log_preamble; "ConvexService"; end
     

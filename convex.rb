@@ -5,7 +5,7 @@ Convex.boot! :forgetful
 Convex << Convex::Lenses::ChronosLens
 
 EngineA = Convex::Engine.new
-EngineA.focus! DATA.read
+pp EngineA.focus!(DATA.read)
 
 __END__
 There is almost nothing more magical than a spectacular fireworks show – and now is the perfect time to let those sparklers in the sky serve as inspiration for your fingertips.

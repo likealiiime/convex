@@ -27,7 +27,7 @@ module Convex
     
     # headers 'Accept-encoding' => 'gzip'
   
-    def log_preamble; "Calais"; end
+    def log_preamble; "CalaisService"; end
     
     def analyze(content)
       escaped_content = CGI.escape(content)
