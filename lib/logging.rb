@@ -1,5 +1,10 @@
 module Convex
   module Logging
+    def self.open_log_with_name(name)
+      @@log ||= File.open(File.join(File.dirname(__FILE__), '..', 'log', "#{name}.log"), 'a')
+      @@log.puts "\n\n"
+    end
+    
     def time_for_log
       Time.now.strftime("%b %d %y %I:%M:%S%p")
     end
@@ -8,8 +13,10 @@ module Convex
       puts ""
     end
     
-    def log(message='')
-      puts "[#{time_for_log}] " << message.to_s
+    def log(message='', extra_stream=$stdout)
+      s = "[#{time_for_log}] " << message.to_s
+      @@log.puts(s)
+      extra_stream.puts(s) if extra_stream
     end
     
     def debug(message='')
@@ -25,7 +32,7 @@ module Convex
     end
     
     def error(message='')
-      log "/!\\ " << message.to_s
+      log("/!\\ " << message.to_s, $stderr)
     end
   end
   

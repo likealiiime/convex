@@ -19,12 +19,15 @@ module Convex
   
   @@next_engine_code = nil
   
+  TMP_PATH = File.join(File.dirname(__FILE__), '..', 'tmp')
+  
   def self.lenses; @@lenses; end
   def self.env; @@env; end
   def self.db; @@db; end
   
   def self.boot!(mode = :development)
     @@env = Convex::Environment.new(mode)
+    Convex::Logging.open_log_with_name(env.mode)
     @@lenses = []
     
     Convex.info "Starting Convex in #{env.mode.to_s.upcase} mode..."
