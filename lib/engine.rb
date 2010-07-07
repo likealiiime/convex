@@ -170,7 +170,7 @@ module Convex
         uri = URI.parse(datum.value)
         context << Datum.new({
           :value => uri.host,
-          :type => Convex::DatumType::URLDomain,
+          :type => Convex::DatumType::CXURLDomain,
           :weight => datum.weight
         }) if uri.is_a? URI::HTTP
       end

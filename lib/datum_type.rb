@@ -48,7 +48,7 @@ module Convex
       end
     
       remember 'NoType'
-      remember 'URLDomain'
+      remember 'CXURLDomain'
     end
   
     private
