@@ -21,7 +21,7 @@ module Convex
     end
   
     def inspect
-      "(#{value}/#{type}/#{weight} #{' #'+id.to_s if id})"
+      "(#{value}/#{type}/#{weight}#{'  #'+id.to_s if id})"
     end
     alias_method :to_s, :inspect
     alias_method :log_preamble, :inspect
