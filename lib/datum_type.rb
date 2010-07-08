@@ -51,6 +51,18 @@ module Convex
       remember 'CXURLDomain'
     end
   
+    def to_json(*args)
+      {
+        'json_class' => self.class.name,
+        'name' => name,
+        'uri' => uri
+      }.to_json(*args)
+    end
+    
+    def self.json_create(object)
+      return self.new(object['name'], object['uri'])
+    end
+    
     private
   
     def constantize!
