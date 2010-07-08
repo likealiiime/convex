@@ -36,8 +36,9 @@ module Convex
       debug "#{context.count} datum in context, #{response.xpath('//rdf:Description').count} rdf:Description nodes left"
     end
   
-    def focus!(text)
+    def focus!(text, data=[])
       reset!
+      @context += data
       write 'last-document.txt', text
       @response_body = @calais.analyze(text).to_s
       info "Focusing %.1fKB of XML..." % (response_body.length.to_f / 1024.0)
@@ -59,6 +60,7 @@ module Convex
       filter_domains_from_urls if Convex::DatumType.knows? 'URL'
       
       write 'remainder.xml', response
+      write 'context.json', context.collect(&:inspect).join("\n")
       info "...Done Focusing! Sending to Lenses..."
       Convex.lenses.each { |lens| lens.focus_using_data!(context, self) }
       return context
