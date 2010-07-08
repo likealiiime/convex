@@ -7,13 +7,13 @@ require 'nokogiri'
 require 'json/ext' # This is the C version; much faster!
 
 # Convex libraries
-require 'lib/logging'
-require 'lib/extensions'
-require 'lib/calais_service'
-require 'lib/engine'
-require 'lib/datum_type'
-require 'lib/datum'
-require 'lib/lens'
+require File.join(File.dirname(__FILE__), 'logging')
+require File.join(File.dirname(__FILE__), 'extensions')
+require File.join(File.dirname(__FILE__), 'calais_service')
+require File.join(File.dirname(__FILE__), 'engine')
+require File.join(File.dirname(__FILE__), 'datum_type')
+require File.join(File.dirname(__FILE__), 'datum')
+require File.join(File.dirname(__FILE__), 'lens')
 
 module Convex
   extend Convex::Logging
@@ -42,6 +42,16 @@ module Convex
       @@db.flushdb
     end
     
+    debug "Booting..."
+    Convex::DatumType.load!
+    info "Loaded DatumTypes"
+    log_newline
+  end
+  
+  def self.headless!
+    Convex.info "Starting Convex in HEADLESS mode..."
+    @@env = Convex::Environment.new(:headless)
+    @@db = NilEcho
     debug "Booting..."
     Convex::DatumType.load!
     info "Loaded DatumTypes"

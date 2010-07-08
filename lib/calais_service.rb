@@ -63,3 +63,13 @@ module Convex
     end
   end
 end
+
+module Convex
+  class CalaisService
+    class Error < RuntimeError
+      def self.for_xml(xml)
+        self.new("#{xml.root['Method'].to_s}: #{xml.xpath('./Exception')[0].inner_text.to_s}")
+      end
+    end
+  end
+end
