@@ -4,11 +4,13 @@ module Convex
   class Datum
     include Convex::CustomizedLogging
     
-    ATTRIBUTES = [:value, :created_at, :calais_ref_uri, :type, :weight, :id]
-    attr_reader   :type, :value, :created_at, :calais_ref_uri, :id
+    ATTRIBUTES = [:value, :created_at, :calais_ref_uri, :type, :weight, :id, :metadata]
+    attr_reader   :type, :value, :created_at, :calais_ref_uri, :id, :metadata
     attr_accessor :weight
 
     def initialize(configuration)
+      configuration.symbolize_keys!
+      configuration.delete(:id) if configuration[:id] == 0 || configuration[:id] == '0'
       configuration = {
         :id => Convex.nid,
         :created_at => Time.now,
@@ -26,13 +28,8 @@ module Convex
     alias_method :to_s, :inspect
     alias_method :log_preamble, :inspect
     
-    def self.for_hash(hash)
-      key = "datum->#{hash}"
-      return Datum.new({
-        :value => Convex.db.hget(key, :value),
-        :type => Convex.db.hget(key, :type),
-        :calais_ref_uri => Convex.db.hget(key, :calais_ref_uri)
-      })
+    def metadata=(new_metadata)
+      @metadata = new_metadata.to_s
     end
     
     def attributes
