@@ -18,6 +18,7 @@ require File.join(File.dirname(__FILE__), 'lens')
 module Convex
   extend Convex::Logging
   
+  @@booted = false
   @@next_engine_code = nil
   
   TMP_PATH = File.join(File.dirname(__FILE__), '..', 'tmp')
@@ -25,8 +26,10 @@ module Convex
   def self.lenses; @@lenses; end
   def self.env; @@env; end
   def self.db; @@db; end
+  def self.booted?; @@booted; end
   
   def self.boot!(mode = :development)
+    return if booted?
     @@env = Convex::Environment.new(mode)
     Convex::Logging.open_log_with_name(env.mode)
     @@lenses = []
@@ -46,16 +49,18 @@ module Convex
     Convex::DatumType.load!
     info "Loaded DatumTypes"
     log_newline
+    @@booted = true
   end
   
   def self.headless!
+    return if booted?
     Convex.info "Starting Convex in HEADLESS mode..."
     @@env = Convex::Environment.new(:headless)
     @@db = NilEcho
     debug "Booting..."
     Convex::DatumType.load!
     info "Loaded DatumTypes"
-    log_newline
+    @@booted = true
   end
   
   def self.next_engine_code
