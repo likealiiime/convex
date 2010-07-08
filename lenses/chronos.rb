@@ -15,36 +15,49 @@ module Convex
 
       def self.focus_using_data!(data, engine)
         log_newline
+        hourly_key = redis_key_for_list(:hourly)
+        life_key = redis_key_for_list(:life)
         data.each do |datum|
           datum.created_at = Time.now if datum.created_at.nil?
           json = JSON.generate(datum)
-          engine.db.lpush redis_key_for_list(:hourly), json
-          engine.db.lpush redis_key_for_list(:life), json
+          engine.db.lpush hourly_key, json
+          engine.db.zadd  life_key, datum.created_at.to_f, json
           #debug "[HOURLY] LPUSHed #{datum.hash}"
         end
         info "[HOURLY] LPUSHed #{data.count} data"
-        self[:hourly]
+        return self
       end
       
       def self.move_data(src, dest)
         validate_period!(src) and validate_period!(dest)
+        raise ArgumentError.new("Cannot move data into or out of Life timeline") if dest == :life || src == :life
+        raise ArgumentError.new("Cannot move data out of Death timeline") if src == :death
+        
         length = Convex.db.llen(redis_key_for_list(src)).to_i
         src_list  = redis_key_for_list src
         dest_list = redis_key_for_list dest
         hashes = []
         length.times do |i|
-          hashes << Convex.db.rpoplpush(src_list, dest_list)
+          hashes << if dest != :death
+            Convex.db.rpoplpush(src_list, dest_list)
+          else
+            # Just RPOPping is fine. No matter what, it's O(N)
+            Convex.db.rpop(src_list)
+          end
         end
         #debug "Moved: " << hashes.inspect
         info "[#{src.to_s.upcase}->#{dest.to_s.upcase}] Moved #{length} data"
+        return hashes
       end
       
       def self.[](period)
+        # TODO Accept a range to select that range of time from :life
         validate_period!(period)
         key = redis_key_for_list(period)
         data = []
         length = Convex.db.llen(key)
         length.times do |i|
+          # Again, there's no way to avoid O(N)
           data << JSON.parse(Convex.db.lindex(key, i))
           #debug "#{i}: #{Datum[Convex.db.lindex(key,i)]}"
         end
