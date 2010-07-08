@@ -61,8 +61,7 @@ module Convex
       
       write 'remainder.xml', response
       write 'context.json', context.collect(&:inspect).join("\n")
-      info "...Done Focusing! Sending to Lenses..."
-      Convex.lenses.each { |lens| lens.focus_using_data!(context, self) }
+      info "...Done Focusing!"
       return context
     rescue Exception => e
       error "Exception caught: #{e.inspect} in #{e.backtrace.first}"
