@@ -33,13 +33,13 @@ module Convex
     alias_method :log_preamble, :inspect
     
     def debug_count
-      debug "#{context.count} datum in context, #{@response.xpath('//*').count} nodes left"
+      debug "#{context.count} datum in context, #{@response.xpath('//rdf:Description').count} rdf:Description nodes left"
     end
   
     def focus!(text)
       reset!
       @response_body = @calais.analyze(text).to_s
-      write_last_response
+      write_last_response_xml
       info "Focusing %.1fKB of XML..." % (@response_body.length.to_f / 1024.0)
       
       @response = Nokogiri.XML(@response_body)
@@ -53,6 +53,7 @@ module Convex
       filter_amounts_from_currencies if Convex::DatumType.knows? 'Currency'
       filter_domains_from_urls if Convex::DatumType.knows? 'URL'
       
+      write_remainder_xml
       info "...Done Focusing! Sending to Lenses..."
       Convex.lenses.each { |lens| lens.focus_using_data!(context, self) }
       return context
@@ -65,9 +66,15 @@ module Convex
     
     private
 
-    def write_last_response
+    def write_last_response_xml
       File.open(File.join(Convex::TMP_PATH, "engine-#{code}_last-response.xml"), 'w') { |f|
-        f.write @response
+        f.write @response.to_s
+      }
+    end
+    
+    def write_remainder_xml
+      File.open(File.join(Convex::TMP_PATH, "engine-#{code}_remainder.xml"), 'w') { |f|
+        f.write @response.to_s
       }
     end
     
