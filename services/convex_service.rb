@@ -13,9 +13,12 @@ module Convex
       Convex::ConvexService.info "Accepted connection"
     end
       
-    def receive_data(data)
-      close_connection
-      Convex::Engine.new.focus! data
+    def receive_data(json)
+      Convex::ConvexService.info("Received %.1fKB of data" % (json.size / 1024.0))
+      transport = JSON.parse(json)
+      data = Convex::Engine.new.focus! transport['document'].to_s
+      send_data JSON.generate(data)
+      close_connection_after_writing
     end
     
     def unbind
