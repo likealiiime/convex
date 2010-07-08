@@ -3,6 +3,7 @@ require 'eventmachine'
 require 'lenses/chronos'
 
 module Convex
+  SERVICE_ADDRESS = '127.0.0.1'
   CLEARED_ADDRESSES = ['127.0.0.1']
   
   module ConvexFocusingService
@@ -43,6 +44,6 @@ EventMachine::run do
   Convex.boot! :forgetful
   Convex << Convex::Lenses::ChronosLens
   Convex.info "Now listening for incoming connections on 127.0.0.1:2689..."
-  EventMachine::start_server '127.0.0.1', Convex::ConvexFocusingService::PORT, Convex::ConvexFocusingService
-  EventMachine::start_server '127.0.0.1', Convex::ConvexRefiningService::PORT, Convex::ConvexRefiningService 
+  EventMachine::start_server Convex::SERVICE_ADDRESS, Convex::ConvexFocusingService::PORT, Convex::ConvexFocusingService
+  EventMachine::start_server Convex::SERVICE_ADDRESS, Convex::ConvexRefiningService::PORT, Convex::ConvexRefiningService 
 end
