@@ -62,11 +62,12 @@ module Convex
       write 'remainder.xml', response
       write 'context.json', context.collect(&:inspect).join("\n")
       info "...Done Focusing!"
-      return context
     rescue Exception => e
       error "Exception caught: #{e.inspect} in #{e.backtrace.first}"
       error "Focusing has been abandoned with #{context.count} datum in context, #{response.xpath('//*').count} nodes left"
       debug e.backtrace.join("\n")
+    ensure
+      context.reject! { |d| d.class != Convex::Datum }
       return context
     end
     
@@ -183,7 +184,8 @@ module Convex
     def filter_amounts_from_currencies
       log_newline
       debug "Filtering amounts from currencies..."
-      uris = @datum_type_index[Convex::DatumType::Currency].collect { |d| d.calais_ref_uri }.join(',')
+      currency_data = @datum_type_index[Convex::DatumType::Currency] || []
+      uris = currency_data.collect { |d| d.calais_ref_uri }.join(',')
       response.xpath("/rdf:RDF/rdf:Description[c:exact and c:subject and contains(\"#{uris}\", c:subject/@rdf:resource)]").each do |node|
         # Enter data as Currency sub-types. Ex - USD
         subject_uri = node.xpath('./c:subject')[0]['resource'].to_s
