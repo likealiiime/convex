@@ -3,7 +3,7 @@ module Convex
     @@log = nil
     
     def self.open_log_with_name(name)
-      @@log ||= File.open(File.join(File.dirname(__FILE__), '..', 'log', "#{name}.log"), 'a')
+      @@log ||= File.open(File.join(Convex::LOG_PATH, "#{name}.log"), 'a')
       @@log.puts "\n\n"
     end
     

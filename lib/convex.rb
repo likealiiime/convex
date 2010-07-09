@@ -4,6 +4,8 @@ require 'ruby-debug'
 require 'pp'
 require 'redis'
 require 'nokogiri'
+require 'eventmachine'
+require 'system_timer'
 require 'json/ext' # This is the C version; much faster!
 
 # Convex libraries
@@ -13,7 +15,6 @@ require File.join(File.dirname(__FILE__), 'calais_service')
 require File.join(File.dirname(__FILE__), 'engine')
 require File.join(File.dirname(__FILE__), 'datum_type')
 require File.join(File.dirname(__FILE__), 'datum')
-require File.join(File.dirname(__FILE__), 'lens')
 
 module Convex
   extend Convex::Logging
@@ -21,7 +22,14 @@ module Convex
   @@booted = false
   @@next_engine_code = nil
   
-  TMP_PATH = File.join(File.dirname(__FILE__), '..', 'tmp')
+  LIB_PATH = File.dirname(__FILE__)
+  LOG_PATH = File.join(LIB_PATH, '..', 'log')
+  TMP_PATH = File.join(LIB_PATH, '..', 'tmp')
+  LENSES_PATH = File.join(LIB_PATH, '..', 'lenses')
+  SERVICES_PATH = File.join(LIB_PATH, '..', 'services')
+  
+  SERVICE_ADDRESS = '127.0.0.1'
+  CLEARED_ADDRESSES = ['127.0.0.1']
   
   def self.lenses; @@lenses; end
   def self.env; @@env; end
