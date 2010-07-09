@@ -1,11 +1,7 @@
-require 'lib/convex'
-require 'eventmachine'
-require 'lenses/chronos'
+require File.join(File.dirname(__FILE__), 'lib', 'convex')
+require File.join(Convex::LENSES_PATH, 'chronos', 'chronos')
 
 module Convex
-  SERVICE_ADDRESS = '127.0.0.1'
-  CLEARED_ADDRESSES = ['127.0.0.1']
-  
   module ConvexFocusingService
     extend Convex::CustomizedLogging
     PORT = 3628 # = FOCU
@@ -17,10 +13,10 @@ module Convex
     end
       
     def receive_data(json)
+      close_connection
       Convex::ConvexFocusingService.info("Received %.1fKB of data" % (json.size / 1024.0))
       transport = JSON.parse(json)
-      data = Convex::Engine.new.focus! transport['document'].to_s, transport['data']
-      close_connection
+      Convex::Engine.new.focus! transport['document'].to_s, transport['data']
     end
     
     def unbind
@@ -30,8 +26,8 @@ module Convex
 end
 
 EventMachine::run do
-  Convex.boot! :forgetful
-  Convex << Convex::Lenses::ChronosLens
-  Convex.info "Now listening for incoming connections on 127.0.0.1:2689..."
+  Convex.boot! :development
+  Convex << Convex::Chronos::Lens
+  Convex::ConvexFocusingService.info "Now listening for incoming connections on #{Convex::SERVICE_ADDRESS}:#{Convex::ConvexFocusingService::PORT}"
   EventMachine::start_server Convex::SERVICE_ADDRESS, Convex::ConvexFocusingService::PORT, Convex::ConvexFocusingService
 end
