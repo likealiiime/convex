@@ -5,8 +5,8 @@ module Convex
     include Convex::CustomizedLogging
     
     ATTRIBUTES = [:value, :created_at, :calais_ref_uri, :type, :weight, :id, :metadata]
-    attr_reader   :type, :value, :created_at, :calais_ref_uri, :id, :metadata
-    attr_accessor :weight
+    attr_reader   *(ATTRIBUTES - [:weight, :creator_id])
+    attr_accessor :weight, :creator_id
 
     def initialize(configuration)
       configuration.symbolize_keys!
