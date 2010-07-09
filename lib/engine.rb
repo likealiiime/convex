@@ -2,7 +2,7 @@ module Convex
   class Engine
     include Convex::CustomizedLogging
     
-    attr_reader   :db, :trash, :response, :response_body, :context, :code
+    attr_reader   :db, :trash, :response, :response_body, :context, :code, :birthdate
     attr_reader   :subject_uri_index, :calais_ref_uri_index, :datum_type_index
     attr_accessor :lenses
 
@@ -14,6 +14,7 @@ module Convex
       @db.select Convex.env.code
       debug "SELECTed #{Convex.env.mode} database, code #{Convex.env.code}"
       @calais = Convex::CalaisService.new
+      @birthdate = Time.now
       reset!
     end
     
@@ -39,13 +40,12 @@ module Convex
     def focus!(text, data=[])
       reset!
       @context += data
-      write 'last-document.txt', text
+      write 'document.txt', text
       @response_body = @calais.analyze(text).to_s
       info "Focusing %.1fKB of XML..." % (response_body.length.to_f / 1024.0)
       
       @response = Nokogiri.XML(response_body)
-      write 'last-response.xml', response
-      write 'remainder.xml', response
+      write 'response.xml', response
       
       raise Convex::CalaisService::Error.from_xml(response) if response.root.name == 'Error'
       
@@ -64,17 +64,19 @@ module Convex
       info "...Done Focusing!"
     rescue Exception => e
       error "Exception caught: #{e.inspect} in #{e.backtrace.first}"
-      error "Focusing has been abandoned with #{context.count} datum in context, #{response.xpath('//*').count} nodes left"
+      error "Focusing has been stopped with #{context.count} datum in context, #{response.xpath('//*').count} nodes left"
       debug e.backtrace.join("\n")
     ensure
       context.reject! { |d| d.class != Convex::Datum }
+      info "Sending to Lenses..."
+      Convex.lenses.each { |lens| lens.focus_using_data!(context, self) }
       return context
     end
     
     private
     
     def write(filename, text)
-      File.open(File.join(Convex::TMP_PATH, "engine-#{code}_#{filename.to_s}"), 'w') { |f|
+      File.open(File.join(Convex::TMP_PATH, "#{birthdate.to_i}_engine-#{code}_#{filename.to_s}"), 'w') { |f|
         f.write text.to_s
       }
     end
