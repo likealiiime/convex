@@ -43,7 +43,7 @@ module Convex
     @@lenses = []
     
     Convex.info "Starting Convex in #{env.mode.to_s.upcase} mode..."
-    @@db = Redis.new
+    @@db = Redis.new(:timeout => 0)
     debug "Connected to Redis"
     @@db.select env.code
     debug "SELECTed #{env.mode} database, code #{env.code}"
