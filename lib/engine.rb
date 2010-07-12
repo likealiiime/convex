@@ -60,7 +60,7 @@ module Convex
       filter_domains_from_urls if Convex::DatumType.knows? 'URL'
       
       write 'remainder.xml', response
-      write 'context.json', context.collect(&:inspect).join("\n")
+      write 'context.txt', context.collect(&:inspect).join("\n")
       info "...Done Focusing!"
     rescue Exception => e
       error "Exception caught: #{e.inspect} in #{e.backtrace.first}"
