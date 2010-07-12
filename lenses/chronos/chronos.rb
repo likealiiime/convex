@@ -13,13 +13,16 @@ module Convex
         log_newline
         hourly_key = redis_key_for_list(:hourly)
         life_key = redis_key_for_list(:life)
+        num_clients = 0
         data.each do |datum|
           datum.created_at = Time.now if datum.created_at.nil?
           json = JSON.generate(datum)
-          engine.db.lpush hourly_key, json
           engine.db.zadd  life_key, datum.created_at.to_f, json
+          engine.db.lpush hourly_key, json
+          num_clients = engine.db.publish :chronos, json
           #debug "[HOURLY] LPUSHed #{datum.hash}"
         end
+        debug "[HOURLY] PUBLISHed to #{num_clients} clients"
         info "[HOURLY] LPUSHed #{data.count} data"
         return self
       end
@@ -65,6 +68,7 @@ module Convex
         raise ArgumentError.new("Period must be one of " << PERIOD.collect { |p| ":#{p.to_s}" }.join(', ')) unless is_valid_period?(period.to_sym)
         return true
       end
+      
     end
   end
 end
