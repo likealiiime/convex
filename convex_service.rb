@@ -4,7 +4,7 @@ require File.join(Convex::LENSES_PATH, 'chronos', 'chronos')
 module Convex
   module ConvexFocusingService
     extend Convex::CustomizedLogging
-    PORT = 3628 # = FOCU
+    PORT = 3627 # = FOCS
     
     def self.log_preamble; "ConvexFocusingService"; end
     
