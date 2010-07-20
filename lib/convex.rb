@@ -9,12 +9,9 @@ require 'system_timer'
 require 'json/ext' # This is the C version; much faster!
 
 # Convex libraries
-require File.join(File.dirname(__FILE__), 'logging')
-require File.join(File.dirname(__FILE__), 'extensions')
-require File.join(File.dirname(__FILE__), 'calais_service')
-require File.join(File.dirname(__FILE__), 'engine')
-require File.join(File.dirname(__FILE__), 'datum_type')
-require File.join(File.dirname(__FILE__), 'datum')
+%w(logging extensions calais_service engine datum_type datum service_ports).each do |lib|
+  require File.join(File.dirname(__FILE__), lib)
+end
 
 module Convex
   extend Convex::Logging
@@ -26,10 +23,6 @@ module Convex
   LOG_PATH = File.join(LIB_PATH, '..', 'log')
   TMP_PATH = File.join(LIB_PATH, '..', 'tmp')
   LENSES_PATH = File.join(LIB_PATH, '..', 'lenses')
-  SERVICES_PATH = File.join(LIB_PATH, '..', 'services')
-  
-  SERVICE_ADDRESS = '127.0.0.1'
-  CLEARED_ADDRESSES = ['127.0.0.1']
   
   def self.lenses; @@lenses; end
   def self.env; @@env; end
