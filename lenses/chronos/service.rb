@@ -1,5 +1,5 @@
 require File.join(File.dirname(__FILE__), '..', '..', 'lib', 'convex') if not defined? Convex
-require File.join(File.dirname(__FILE__), 'lens') if not defined? Convex::Chronos
+require File.join(File.dirname(__FILE__), 'lens') if not defined? Convex::Chronos::Lens
 require File.join(Convex::LIB_PATH, 'em-websocket', 'em-websocket')
 
 module Convex
@@ -47,7 +47,7 @@ websocket_thread = Thread.new {
       Thread.current.kill
     }
 
-    Convex::Chronos::Service.info "[EM] Now listening for incoming WebSocket connections on #{Convex::Service::ADDRESS}:#{Convex::Chronos::Service::PORT}"
+    Convex::Chronos::Service.info "[EM] Now listening for WebSocket connections on #{Convex::Service::ADDRESS}:#{Convex::Chronos::Service::PORT}"
     EventMachine::WebSocket.start(:host => Convex::Service::ADDRESS, :port => Convex::Chronos::Service::PORT) do |ws|
       ws.onopen {
         Convex::Chronos::Service.debug "[EM] WebSocket connection opened"
@@ -56,7 +56,7 @@ websocket_thread = Thread.new {
         Convex::Chronos::Service.debug "[EM] WebSocket connection closed"
       }
       ws.onmessage { |msg|
-        debug "[EM] Recieved message: #{msg}"
+        Convex::Chronos::Service.debug "[EM] Recieved message: #{msg}"
       }
       
       chronos_thread[:websockets] ||= []
