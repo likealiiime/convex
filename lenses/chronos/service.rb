@@ -10,8 +10,6 @@ module Convex
   end
 end
 
-Convex.boot! :development
-
 chronos_thread = Thread.new {
   Convex.db.subscribe(:chronos) do |on|
     on.subscribe do |klass, num_subs|
@@ -62,5 +60,6 @@ websocket_thread = Thread.new {
   end # EventMachine 
 }
 
+          Convex.boot!
   chronos_thread.join
 websocket_thread.join

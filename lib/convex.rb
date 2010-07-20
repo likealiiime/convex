@@ -29,8 +29,11 @@ module Convex
   def self.db; @@db; end
   def self.booted?; @@booted; end
   
-  def self.boot!(mode = :development)
+  def self.boot!
     return if booted?
+    mode = $*.empty? ? :forgetful : $*.first.to_sym
+    
+    raise Environment::CannotBootIntoHeadlessModeError.new("Cannot Convex.boot! into headless mode. Call Convex.headless! instead.") if mode == :headless
     @@env = Convex::Environment.new(mode)
     Convex::Logging.open_log_with_name(env.mode)
     @@lenses = []
@@ -87,13 +90,17 @@ end
 
 module Convex
   class Environment
-    attr_accessor :mode
-    def initialize(mode)
-      @mode = mode.to_sym
+    class EnvironmentNotRecognizedError < ArgumentError; end
+    class CannotBootIntoHeadlessModeError < RuntimeError; end
+    
+    MODES = [:development, :forgetful, :production, :headless]
+    attr_reader :mode
+    
+    def initialize(mode);
+      raise EnvironmentNotRecognizedError.new("#{mode} is not one of: #{MODES.join(', ')}") unless MODES.include? mode.to_sym
+      @mode = mode.to_sym;
     end
-    def code
-      [:development, :forgetful].index(mode)
-    end
+    def code; mode == :headless ? -1 : MODES.index(mode); end
     def development?; mode == :development || mode == :forgetful; end
     def forgetful?; mode == :forgetful; end
   end

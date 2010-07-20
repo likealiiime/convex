@@ -26,7 +26,7 @@ module Convex
 end
 
 EventMachine::run do
-  Convex.boot! :development
+  Convex.boot!
   Convex << [Convex::Chronos::Lens, Convex::Eros::Lens]
   Convex::ConvexFocusingService.info "Now listening for incoming connections on #{Convex::Service::ADDRESS}:#{Convex::ConvexFocusingService::PORT}"
   EventMachine::start_server Convex::Service::ADDRESS, Convex::ConvexFocusingService::PORT, Convex::ConvexFocusingService
