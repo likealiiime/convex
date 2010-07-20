@@ -39,7 +39,7 @@ module Convex
   end
   
   module CustomizedLogging
-    def log_preamble; ''; end
+    def log_preamble; self.name; end
     %w(debug info warn error).each do |level|
       class_eval "def #{level}(message=''); Convex.#{level}(log_preamble.to_s << ': ' << message.to_s); end"
     end
