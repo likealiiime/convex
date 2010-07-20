@@ -4,6 +4,7 @@ module Convex
       extend Convex::CustomizedLogging
       
       PERIODS = [:life, :hourly, :daily, :weekly, :monthly, :yearly, :death]
+      TRANSIENT_PERIODS = PERIODS - [:life, :death]
       
       def self.is_valid_period?(time); PERIODS.include?(time.to_sym); end
       def self.log_preamble; 'Chronos::Lens'; end
@@ -25,6 +26,14 @@ module Convex
         info "[HOURLY] LPUSHed #{data.count} data"
         debug "[HOURLY] PUBLISHed to #{num_clients} clients"
         return self
+      end
+      
+      def self.ping
+        debug "Someone is pinging the lens..."
+        pong = [Convex.db.zcard(redis_key_for_list(:life))]
+        pong += TRANSIENT_PERIODS.collect { |p| Convex.db.llen(redis_key_for_list(p)) }
+        info  "Pong: #{pong.join(' ')}"
+        pong.join(' ')
       end
       
       def self.[](period)
