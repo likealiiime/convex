@@ -1,10 +1,10 @@
 require File.join(File.dirname(__FILE__), 'lib', 'convex')
-require File.join(Convex::LENSES_PATH, 'chronos', 'chronos')
+require File.join(Convex::LENSES_PATH, 'chronos', 'lens')
+require File.join(Convex::LENSES_PATH, 'eros', 'lens')
 
 module Convex
   module ConvexFocusingService
     extend Convex::CustomizedLogging
-    PORT = 3627 # = FOCS
     
     def self.log_preamble; "ConvexFocusingService"; end
     
@@ -27,7 +27,7 @@ end
 
 EventMachine::run do
   Convex.boot! :development
-  Convex << Convex::Chronos::Lens
-  Convex::ConvexFocusingService.info "Now listening for incoming connections on #{Convex::SERVICE_ADDRESS}:#{Convex::ConvexFocusingService::PORT}"
-  EventMachine::start_server Convex::SERVICE_ADDRESS, Convex::ConvexFocusingService::PORT, Convex::ConvexFocusingService
+  Convex << Convex::Chronos::Lens#, Convex::Eros::Lens
+  Convex::ConvexFocusingService.info "Now listening for incoming connections on #{Convex::Service::ADDRESS}:#{Convex::ConvexFocusingService::PORT}"
+  EventMachine::start_server Convex::Service::ADDRESS, Convex::ConvexFocusingService::PORT, Convex::ConvexFocusingService
 end
