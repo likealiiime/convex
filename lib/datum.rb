@@ -6,7 +6,7 @@ module Convex
     
     ATTRIBUTES = [:value, :created_at, :creator_id, :calais_ref_uri, :type, :weight, :id, :metadata]
     attr_reader   *ATTRIBUTES
-    attr_accessor [:weight, :creator_id]
+    attr_accessor :weight, :creator_id
 
     def initialize(configuration)
       configuration.symbolize_keys!
