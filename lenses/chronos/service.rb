@@ -18,7 +18,7 @@ chronos_thread = Thread.new {
       Convex::Chronos::Service.info "[SUB] Subscribed to #{klass} (now #{num_subs} subscriptions)"
     end
     on.message do |klass, msg|
-      Convex::Chronos::Service.info("[SUB] #{klass} forwarded %.1fK message to WebSocket" % (msg.length / 1024.0))
+      Convex::Chronos::Service.info("[SUB] #{klass} forwarding %.1fK message to WebSocket:" % (msg.length / 1024.0))
       Convex::Chronos::Service.debug "[SUB] Message:\n#{msg}\n--- End of Message\n"
       Thread.current[:websockets] ||= []
       Thread.current[:websockets].each do |ws|
