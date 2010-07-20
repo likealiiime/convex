@@ -2,7 +2,7 @@ module Convex
   class Engine
     include Convex::CustomizedLogging
     
-    attr_reader   :db, :trash, :response, :response_body, :context, :code, :birthdate
+    attr_reader   :db, :trash, :response, :response_body, :context, :overrides, :code, :birthdate
     attr_reader   :subject_uri_index, :calais_ref_uri_index, :datum_type_index
     attr_accessor :lenses
 
@@ -24,6 +24,7 @@ module Convex
       @response_body = nil
       @response = NilEcho
       @context = []
+      @overrides = {}
       @subject_uri_index = {}
       @calais_ref_uri_index = {}
       @datum_type_index = {}
@@ -37,8 +38,9 @@ module Convex
       debug "#{context.count} datum in context, #{response.xpath('//rdf:Description').count} rdf:Description nodes left"
     end
   
-    def focus!(text, data=[])
+    def focus!(text, data=[], overrides={})
       reset!
+      @overrides = overrides
       @context += data
       write 'document.txt', text
       @response_body = @calais.analyze(text).to_s
@@ -82,7 +84,7 @@ module Convex
     end
     
     def new_and_indexed_datum(config)
-      datum = Datum.new(config)
+      datum = Datum.new(config.merge(overrides))
       @datum_type_index[datum.type] ||= []
       @datum_type_index[datum.type] << datum
       return datum

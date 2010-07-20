@@ -16,7 +16,7 @@ module Convex
       close_connection
       Convex::ConvexFocusingService.info("Received %.1fKB of data" % (json.size / 1024.0))
       transport = JSON.parse(json)
-      Convex::Engine.new.focus! transport['document'].to_s, transport['data']
+      Convex::Engine.new.focus! transport['document'].to_s, transport['data'], transport['overrides']
     end
     
     def unbind
