@@ -22,8 +22,8 @@ module Convex
           num_clients = engine.db.publish :chronos, json
           #debug "[HOURLY] LPUSHed #{datum.hash}"
         end
-        debug "[HOURLY] PUBLISHed to #{num_clients} clients"
         info "[HOURLY] LPUSHed #{data.count} data"
+        debug "[HOURLY] PUBLISHed to #{num_clients} clients"
         return self
       end
       

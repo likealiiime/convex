@@ -16,6 +16,7 @@ end
 module Convex
   extend Convex::Logging
   
+  @@db = NilEcho
   @@booted = false
   @@next_engine_code = nil
   
@@ -60,7 +61,6 @@ module Convex
     return if booted?
     Convex.info "Starting Convex in HEADLESS mode..."
     @@env = Convex::Environment.new(:headless)
-    @@db = NilEcho
     debug "Booting..."
     Convex::DatumType.load!
     info "Loaded DatumTypes"

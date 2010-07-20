@@ -10,15 +10,19 @@ module Convex
   end
 end
 
+Convex.boot!
+
 chronos_thread = Thread.new {
+  Convex::Chronos::Service.debug "[SUB] Subscribing to Redis' chronos channel..."
   Convex.db.subscribe(:chronos) do |on|
+    Thread.current[:subscribed] = true
     on.subscribe do |klass, num_subs|
-      Convex::Chronos::Service.info "[SUB] Subscribed to #{klass} (now #{num_subs} subscriptions)"
+      Convex::Chronos::Service.info "[SUB] Subscribed to #{klass} (now #{num_subs} subscriptions)\n"
     end
     on.message do |klass, msg|
-      Convex::Chronos::Service.info("[SUB] #{klass} forwarding %.1fK message to WebSocket:" % (msg.length / 1024.0))
-      Convex::Chronos::Service.debug "[SUB] Message:\n#{msg}\n--- End of Message\n"
       Thread.current[:websockets] ||= []
+      Convex::Chronos::Service.info("[SUB] #{klass} forwarding %.1fK message to #{Thread.current[:websockets].length} WebSocket(s)" % (msg.length / 1024.0))
+      Convex::Chronos::Service.debug "[SUB] Message:\n#{msg}\n--- End of Message\n\n"
       Thread.current[:websockets].each do |ws|
         if ws && ws.state == :connected
           ws.send(msg)
@@ -35,6 +39,7 @@ chronos_thread = Thread.new {
 }
 
 websocket_thread = Thread.new {
+  raise RuntimeError.new("Thread is not subscribed to Redis") unless chronos_thread[:subscribed]
   EventMachine::run do
     trap("INT") {
       Convex.db.unsubscribe :chronos
@@ -60,6 +65,5 @@ websocket_thread = Thread.new {
   end # EventMachine 
 }
 
-          Convex.boot!
   chronos_thread.join
 websocket_thread.join
