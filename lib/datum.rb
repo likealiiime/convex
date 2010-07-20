@@ -4,9 +4,10 @@ module Convex
   class Datum
     include Convex::CustomizedLogging
     
-    ATTRIBUTES = [:value, :created_at, :calais_ref_uri, :type, :weight, :id, :metadata]
-    attr_reader   *(ATTRIBUTES - [:weight, :creator_id])
-    attr_accessor :weight, :creator_id
+    ATTRIBUTES = [:value, :created_at, :calais_ref_uri, :styledon_ref_path, :type, :weight, :id, :metadata]
+    MUTABLE_ATTRIBUTES = [:weight, :creator_id, :styledon_ref_path] # metadata is mutable, but handled specially
+    attr_reader   *(ATTRIBUTES - MUTABLE_ATTRIBUTES)
+    attr_accessor *MUTABLE_ATTRIBUTES
 
     def initialize(configuration)
       configuration.symbolize_keys!
@@ -18,7 +19,7 @@ module Convex
         :type => DatumType::NoType
       }.merge(configuration)
       ATTRIBUTES.each { |attribute|
-        instance_variable_set("@#{attribute}".to_sym, configuration[attribute.to_sym])
+        instance_variable_set("@#{attribute}".to_sym, configuration[attribute])
       }
     end
   
