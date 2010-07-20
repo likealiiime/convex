@@ -69,7 +69,9 @@ module Convex
   end
   
   def self.<<(*lenses)
+    lenses.flatten! if Array === lenses.first
     @@lenses |= lenses
+    lenses.each { |l| info "Accepted #{l.name}" }
   end
   
   def self.nid
