@@ -1,4 +1,4 @@
-require File.join(File.dirname(__FILE__), 'lib', 'convex')
+require File.join(File.dirname(__FILE__), 'convex')
 require File.join(Convex::LENSES_PATH, 'chronos', 'lens')
 require File.join(Convex::LENSES_PATH, 'eros', 'lens')
 
