@@ -36,6 +36,10 @@ module Convex
     def error(message='')
       log("/!\\ " << message.to_s, $stderr)
     end
+    
+    def log_flush
+      @@log.flush
+    end
   end
   
   module CustomizedLogging
@@ -44,5 +48,6 @@ module Convex
       class_eval "def #{level}(message=''); Convex.#{level}(log_preamble.to_s << ': ' << message.to_s); end"
     end
     def log_newline; Convex.log_newline; end
+    def log_flush; Convex.log_flush; end
   end
 end
