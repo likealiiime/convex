@@ -8,9 +8,12 @@ module Convex
     PORT = 2689 # = CNVX
   end
   
-  module Chronos; module Service
-    PORT = 8463 # = TIME
-  end; end
+  module Chronos
+    module Service
+      PORT = 8463 # = TIME
+    end
+  end
+  
   
   module Eros; module Service
     PORT = 5683 # = LOVE
