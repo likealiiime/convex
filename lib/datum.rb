@@ -4,10 +4,9 @@ module Convex
   class Datum
     include Convex::CustomizedLogging
     
-    ATTRIBUTES = [:value, :created_at, :calais_ref_uri, :styledon_ref_path, :type, :weight, :id, :metadata]
-    MUTABLE_ATTRIBUTES = [:weight, :creator_id, :styledon_ref_path] # metadata is mutable, but handled specially
-    attr_reader   *(ATTRIBUTES - MUTABLE_ATTRIBUTES)
-    attr_accessor *MUTABLE_ATTRIBUTES
+    ATTRIBUTES = [:value, :created_at, :creator_id, :calais_ref_uri, :type, :weight, :id, :metadata]
+    attr_reader   *ATTRIBUTES
+    attr_accessor [:weight, :creator_id]
 
     def initialize(configuration)
       configuration.symbolize_keys!
