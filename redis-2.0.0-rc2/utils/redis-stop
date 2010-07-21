@@ -1,0 +1,2 @@
+#!/bin/sh
+echo "SHUTDOWN" | netcat localhost 6379
