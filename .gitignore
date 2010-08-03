@@ -16,3 +16,5 @@ redis*/release
 redis*/myredis.conf
 redis*/misc/*
 redis*/release.h
+*/.DS_Store
+.DS_Store
