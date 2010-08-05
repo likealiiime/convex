@@ -49,6 +49,8 @@ module Convex
     
       remember 'NoType'
       remember 'CXURLDomain'
+      
+      Convex.debug "Loaded DatumTypes"
     end
   
     def to_json(*args)

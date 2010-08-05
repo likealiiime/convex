@@ -52,7 +52,6 @@ module Convex
     
     debug "Booting..."
     Convex::DatumType.load!
-    info "Loaded DatumTypes"
     log_newline
     @@booted = true
   end
@@ -63,7 +62,6 @@ module Convex
     @@env = Convex::Environment.new(:headless)
     debug "Booting..."
     Convex::DatumType.load!
-    info "Loaded DatumTypes"
     @@booted = true
   end
   
