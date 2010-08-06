@@ -11,59 +11,72 @@ module Convex
 end
 
 Convex.boot!
+Convex.force_debug_logging
+Thread.abort_on_exception = true
 
 chronos_thread = Thread.new {
   Convex::Chronos::Service.debug "[SUB] Subscribing to Redis' chronos channel..."
-  Convex.db.subscribe(:chronos) do |on|
+  # A subscribed connection cannot do anything other than unsubscribe, so use a new connection
+  Convex.new_redis_connection.subscribe(:chronos) do |on|
+    
     Thread.current[:subscribed] = true
+    
     on.subscribe do |klass, num_subs|
       Convex::Chronos::Service.info "[SUB] Subscribed to #{klass} (now #{num_subs} subscriptions)\n"
+      chronos_thread = Thread.current
+      
+      Thread.current[:web_socket_thread] = Thread.new {
+        raise RuntimeError.new("Thread is not subscribed to Redis") unless chronos_thread[:subscribed]
+        Convex::Chronos::Service.debug "[EM] Starting reactor..."
+        EventMachine::run do
+          Convex::Chronos::Service.info "[EM] Now listening for WebSocket connections on #{Convex::Service::ADDRESS}:#{Convex::Chronos::Service::PORT}"
+          EventMachine::WebSocket.start(:host => Convex::Service::ADDRESS, :port => Convex::Chronos::Service::PORT) do |ws|
+            ws.onopen {
+              Convex::Chronos::Service.debug "[WS] WebSocket connection opened"
+            }
+            ws.onclose {
+              Convex::Chronos::Service.debug "[WS] WebSocket connection closed"
+            }
+            ws.onmessage { |msg|
+              Convex::Chronos::Service.debug "[WS] Recieved message: #{msg}"
+              if msg == 'context'
+                Convex::Chronos::Service.debug "[WS] Received CONTEXT command. Replying with context of 50..."
+                ws.send("context-" << Convex::Chronos::Lens.context_json(50))
+              end
+            }
+
+            chronos_thread[:web_sockets] ||= []
+            chronos_thread[:web_sockets] << ws
+          end # WebSocket
+          
+          trap("INT") {
+            Convex.db.unsubscribe :chronos
+          }
+        end # EventMachine 
+      } # WebSocket thread
+      
     end
+    
     on.message do |klass, msg|
-      Thread.current[:websockets] ||= []
-      Convex::Chronos::Service.info("[SUB] #{klass} forwarding %.1fK message to #{Thread.current[:websockets].length} WebSocket(s)" % (msg.length / 1024.0))
+      Thread.current[:web_sockets] ||= []
+      Convex::Chronos::Service.info("[SUB] #{klass} forwarding %.1fK message to #{Thread.current[:web_sockets].length} WebSocket(s)" % (msg.length / 1024.0))
       Convex::Chronos::Service.debug "[SUB] Message:\n#{msg}\n--- End of Message\n\n"
-      Thread.current[:websockets].each do |ws|
+      Thread.current[:web_sockets].each do |ws|
         if ws && ws.state == :connected
           ws.send(msg)
         else
-          Thread.current[:websockets].delete(ws)
+          Thread.current[:web_sockets].delete(ws)
         end
       end 
     end
+    
     on.unsubscribe do |klass, num_subs|
       Convex::Chronos::Service.info "[SUB] Unsubscribed from #{klass} (now has #{num_subs} subscriptions)"
+      Thread.current[:web_socket_thread].kill
       Thread.current.kill
     end
+    
   end
 }
 
-websocket_thread = Thread.new {
-  raise RuntimeError.new("Thread is not subscribed to Redis") unless chronos_thread[:subscribed]
-  EventMachine::run do
-    trap("INT") {
-      Convex.db.unsubscribe :chronos
-      EventMachine.stop
-      Thread.current.kill
-    }
-
-    Convex::Chronos::Service.info "[EM] Now listening for WebSocket connections on #{Convex::Service::ADDRESS}:#{Convex::Chronos::Service::PORT}"
-    EventMachine::WebSocket.start(:host => Convex::Service::ADDRESS, :port => Convex::Chronos::Service::PORT) do |ws|
-      ws.onopen {
-        Convex::Chronos::Service.debug "[EM] WebSocket connection opened"
-      }
-      ws.onclose {
-        Convex::Chronos::Service.debug "[EM] WebSocket connection closed"
-      }
-      ws.onmessage { |msg|
-        Convex::Chronos::Service.debug "[EM] Recieved message: #{msg}"
-      }
-      
-      chronos_thread[:websockets] ||= []
-      chronos_thread[:websockets] << ws
-    end # WebSocket
-  end # EventMachine 
-}
-
-  chronos_thread.join
-websocket_thread.join
+chronos_thread.join

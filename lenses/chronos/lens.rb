@@ -40,15 +40,15 @@ module Convex
         debug "Someone is asking for #{period} data..."
         Convex::Chronos::Lens.validate_period!(period)
         key = Convex::Chronos::Lens.redis_key_for_list(period)
-        data = []
-        length = Convex.db.llen(key)
-        length.times do |i|
-          # There's no way to avoid O(N)
-          data << JSON.parse(Convex.db.lindex(key, i))
-          #debug "#{i}: #{Datum[Convex.db.lindex(key,i)]}"
-        end
+        data = JSON.parse(Convex.db.lrange(key, 0, Convex.db.llen(key) - 1).join(','))
         debug "Returned #{data.length} data"
         return data
+      end
+      
+      def self.context_json(n)
+        debug "Someone is asking for the last #{n} hourly data as context..."
+        key = Convex::Chronos::Lens.redis_key_for_list :hourly
+        return '[' + (Convex.db.lrange(key, 0, n-1) || []).join(',') + ']'
       end
       
       def self.move_data(src, dest)
