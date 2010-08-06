@@ -1,6 +1,7 @@
 module Convex
   module Logging
     @@log = nil
+    @@log_should_debug = false
     
     def self.open_log_with_name(name)
       @@log ||= File.open(File.join(Convex::LOG_PATH, "#{name}.log"), 'a')
@@ -11,9 +12,7 @@ module Convex
       Time.now.strftime("%b %d %y %I:%M:%S%p")
     end
 
-    def log_newline
-      puts ""
-    end
+    def log_newline; log; end
     
     def log(message='', extra_stream=$stdout)
       s = "[#{time_for_log}] " << message.to_s
@@ -21,8 +20,17 @@ module Convex
       extra_stream.puts(s) if extra_stream
     end
     
+    def force_debug_logging
+      @@log_should_debug = true
+      #debug "Debug logging forced"
+    end
+    
+    def log_should_debug?
+      @@log_should_debug || Convex.env.development?
+    end
+    
     def debug(message='')
-      log "--- " << message.to_s if env.development?
+      log "--- " << message.to_s if log_should_debug?
     end
     
     def info(message='')
