@@ -39,9 +39,10 @@ chronos_thread = Thread.new {
             }
             ws.onmessage { |msg|
               Convex::Chronos::Service.debug "[WS] Recieved message: #{msg}"
-              if msg == 'context'
-                Convex::Chronos::Service.debug "[WS] Received CONTEXT command. Replying with context of 50..."
-                ws.send("context-" << Convex::Chronos::Lens.context_json(50))
+              if msg[0..6] == 'context'
+                n = msg.split(' ').last.to_i
+                Convex::Chronos::Service.debug "[WS] Received CONTEXT command. Replying with context of #{n}..."
+                ws.send("context-" << Convex::Chronos::Lens.context_json(n))
               end
             }
 
