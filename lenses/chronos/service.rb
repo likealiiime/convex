@@ -64,7 +64,7 @@ chronos_thread = Thread.new {
       Convex::Chronos::Service.debug "[SUB] Message:\n#{msg}\n--- End of Message\n\n"
       Thread.current[:web_sockets].each do |ws|
         if ws && ws.state == :connected
-          ws.send(msg)
+          ws.send("new-" << msg)
         else
           Thread.current[:web_sockets].delete(ws)
         end
