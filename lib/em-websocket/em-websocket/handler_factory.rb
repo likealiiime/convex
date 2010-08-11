@@ -38,7 +38,6 @@ module EventMachine
 
         version = request['Sec-WebSocket-Key1'] ? 76 : 75
 
-        puts version
         case version
         when 75
           Handler75.new(request, response, debug)
