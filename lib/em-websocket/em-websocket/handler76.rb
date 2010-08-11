@@ -21,6 +21,7 @@ module EventMachine
         upgrade << "Upgrade: WebSocket\r\n"
         upgrade << "Connection: Upgrade\r\n"
         upgrade << "Sec-WebSocket-Location: #{location}\r\n"
+        puts "Setting websocket-origin to #{@request['Origin']}"
         upgrade << "Sec-WebSocket-Origin: #{@request['Origin']}\r\n"
         if protocol = @request['Sec-WebSocket-Protocol']
           validate_protocol!(protocol)
