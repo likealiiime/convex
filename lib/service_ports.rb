@@ -1,6 +1,6 @@
 module Convex
   module Service
-    ADDRESS = '127.0.0.1'
+    ADDRESS = '0.0.0.0'
     ACCEPTABLE_ADDRESSES = %w(127.0.0.1)
   end
   
@@ -8,11 +8,9 @@ module Convex
     PORT = 2689 # = CNVX
   end
   
-  module Chronos
-    module Service
-      PORT = 8463 # = TIME
-    end
-  end
+  module Chronos; module Service
+    PORT = 8463 # = TIME
+  end; end
   
   
   module Eros; module Service
