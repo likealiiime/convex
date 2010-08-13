@@ -40,6 +40,7 @@ module Convex
   
     def focus!(text, data=[], overrides={})
       reset!
+      # Note: overrides only get applied to the Datum derived from Calais, not to Datum provided in data
       @overrides = overrides
       @context += data
       write 'document.txt', text

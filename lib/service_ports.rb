@@ -12,7 +12,6 @@ module Convex
     PORT = 8463 # = TIME
   end; end
   
-  
   module Eros; module Service
     PORT = 5683 # = LOVE
   end; end
