@@ -4,10 +4,11 @@ module Convex
   class Datum
     include Convex::CustomizedLogging
     
-    ATTRIBUTES = [:value, :created_at, :creator_id, :calais_ref_uri, :type, :weight, :id, :metadata]
+    ATTRIBUTES = [:value, :created_at, :creator_id, :calais_ref_uri, :type, :weight, :id, :metadata, :source_url]
     attr_reader   *ATTRIBUTES
     attr_accessor :weight, :creator_id
-
+    # Note: creator_id is who generated the Datum, not who created the resource the Datum
+    # represents. It is used in Eros to index users' content
     def initialize(configuration)
       configuration.symbolize_keys!
       configuration.delete(:id) if configuration[:id] == 0 || configuration[:id] == '0'
