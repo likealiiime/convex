@@ -30,7 +30,7 @@ chronos_thread = Thread.new {
         Convex::Chronos::Service.debug "[EM] Starting reactor..."
         EventMachine::run do
           Convex::Chronos::Service.info "[EM] Now listening for WebSocket connections on #{Convex::Service::ADDRESS}:#{Convex::Chronos::Service::PORT}"
-          EventMachine::WebSocket.start(:host => Convex::Service::ADDRESS, :port => Convex::Chronos::Service::PORT) do |ws|
+          EventMachine::WebSocket.start(:host => Convex::Service::ADDRESS, :port => Convex::Chronos::Service::PORT, :debug => true) do |ws|
             ws.onopen {
               Convex::Chronos::Service.debug "[WS] WebSocket connection opened"
             }
@@ -61,7 +61,7 @@ chronos_thread = Thread.new {
     on.message do |klass, msg|
       Thread.current[:web_sockets] ||= []
       Convex::Chronos::Service.info("[SUB] #{klass} forwarding %.1fK message to #{Thread.current[:web_sockets].length} WebSocket(s)" % (msg.length / 1024.0))
-      Convex::Chronos::Service.debug "[SUB] Message:\n#{msg}\n--- End of Message\n\n"
+      Convex::Chronos::Service.debug "[SUB] Message:\nnew-#{msg}\n--- End of Message\n\n"
       Thread.current[:web_sockets].each do |ws|
         if ws && ws.state == :connected
           ws.send("new-" << msg)
