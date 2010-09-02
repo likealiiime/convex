@@ -29,6 +29,10 @@ module Convex
     alias_method :to_s, :inspect
     alias_method :log_preamble, :inspect
     
+    def topic
+      "#{value} (#{type.name})"
+    end
+    
     def metadata=(new_metadata)
       @metadata = new_metadata.to_s
     end
