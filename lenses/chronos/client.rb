@@ -11,4 +11,9 @@ if ARGV.first == 'ping'
 elsif ARGV.first == 'move'
   ARGV.shift
   Convex::Chronos::Lens.move_data(ARGV.shift, ARGV.shift)
+elsif ARGV.first == 'index'
+  Convex::Chronos::Lens.index_ids!
+elsif ARGV.first == 'id'
+  ARGV.shift
+  $stdout << Convex::Chronos::Lens.id_datum_json(ARGV.shift)
 end
