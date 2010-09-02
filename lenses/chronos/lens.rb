@@ -3,8 +3,8 @@ module Convex
     class Lens
       extend Convex::CustomizedLogging
       
-      PERIODS = [:life, :hourly, :daily, :weekly, :monthly, :yearly, :death]
-      TRANSIENT_PERIODS = PERIODS - [:life, :death]
+      PERIODS = [:life, :hourly, :daily, :weekly, :monthly, :yearly, :death, :id]
+      TRANSIENT_PERIODS = PERIODS - [:life, :death, :id]
       
       def self.is_valid_period?(time); PERIODS.include?(time.to_sym); end
       def self.log_preamble; 'Chronos::Lens'; end
@@ -12,20 +12,43 @@ module Convex
 
       def self.focus_using_data!(data, engine)
         log_newline
-        hourly_key = redis_key_for_list(:hourly)
-        life_key = redis_key_for_list(:life)
         num_clients = 0
         data.each do |datum|
           datum.created_at = Time.now if datum.created_at.nil?
           json = JSON.generate(datum)
-          engine.db.zadd  life_key, datum.created_at.to_f, json
-          engine.db.lpush hourly_key, json
+          engine.db.hset  redis_key_for_list(:id), datum.id, json
+          engine.db.zadd  redis_key_for_list(:life), datum.created_at.to_f, json
+          engine.db.lpush redis_key_for_list(:hourly), json
           num_clients = engine.db.publish :chronos, json
-          #debug "[HOURLY] LPUSHed #{datum.hash}"
         end
         info "[HOURLY] LPUSHed #{data.count} data"
         debug "[HOURLY] PUBLISHed to #{num_clients} clients"
         return self
+      end
+      
+      def self.index_ids!
+        regexp = /"id":(\d+)/
+        num_created = 0
+        Convex.db.zrevrange(redis_key_for_list(:life), 0,-1).each do |json|
+          match = json.match(regexp)
+          next unless match
+          id = match[1]
+          created = Convex.db.hset(redis_key_for_list(:id), id, json)
+          debug "Datum ##{id} was #{created ? 'newly indexed' : 'already indexed'}"
+          num_created += 1 if created
+        end
+        info "#{num_created} data were newly indexed"
+        return num_created
+      end  
+      
+      def self.id_datum_json(id)
+        json = Convex.db.hget(redis_key_for_list(:id), id)
+        if json
+          debug "Found ##{id}: #{json}"
+        else
+          warn "Datum ##{id} either does not exist or is not indexed"
+        end
+        return json
       end
       
       def self.ping
@@ -53,9 +76,10 @@ module Convex
       
       def self.move_data(src, dest)
         validate_period!(src) and validate_period!(dest)
+        raise ArgumentError.new("Cannot move data into or out of ID index") if dest == :id || src == :id
         raise ArgumentError.new("Cannot move data into or out of Life timeline") if dest == :life || src == :life
         raise ArgumentError.new("Cannot move data out of Death timeline") if src == :death
-        
+                
         length = Convex.db.llen(redis_key_for_list(src)).to_i
         src_list  = redis_key_for_list src
         dest_list = redis_key_for_list dest
