@@ -43,7 +43,10 @@ module Convex
       # Note: overrides only get applied to the Datum derived from Calais, not to Datum provided in data
       @overrides = overrides
       @context += data
-      write 'document.txt', text
+      #write 'document.txt', text
+      
+      raise LocalJumpError.new("Engine has been instructed to skip Calais processing") if text == "--SKIP--"
+      
       @response_body = @calais.analyze(text).to_s
       info "Focusing %.1fKB of XML..." % (response_body.length.to_f / 1024.0)
       
@@ -62,8 +65,8 @@ module Convex
       filter_amounts_from_currencies if Convex::DatumType.knows? 'Currency'
       filter_domains_from_urls if Convex::DatumType.knows? 'URL'
       
-      write 'remainder.xml', response
-      write 'context.txt', context.collect(&:inspect).join("\n")
+      #write 'remainder.xml', response
+      #write 'context.txt', context.collect(&:inspect).join("\n")
       info "...Done Focusing!"
     rescue Exception => e
       error "Exception caught: #{e.inspect} in #{e.backtrace.first}"
