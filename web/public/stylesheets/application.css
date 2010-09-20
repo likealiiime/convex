@@ -53,6 +53,9 @@ a {
 a:hover {
 	background-color: #FFFFC4;
 }
+.working {
+	font-style: italic;
+}
 .running {
 	color: #8FD44F;
 	background-color: #DDFFD2;
