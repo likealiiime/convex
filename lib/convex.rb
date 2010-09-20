@@ -23,6 +23,7 @@ module Convex
   LIB_PATH = File.dirname(__FILE__)
   LOG_PATH = File.join(LIB_PATH, '..', 'log')
   TMP_PATH = File.join(LIB_PATH, '..', 'tmp')
+  PIDS_PATH = File.join(LIB_PATH, '..', 'pids')
   LENSES_PATH = File.join(LIB_PATH, '..', 'lenses')
   
   def self.lenses; @@lenses; end
@@ -86,7 +87,7 @@ module Convex
   end
   
   def self.new_redis_connection
-    Redis.new(:timeout => 0)
+    Redis.new(:host => Convex::Service::ADDRESS, :port => Convex::RedisService::PORT, :timeout => 0)
   end
 end
 

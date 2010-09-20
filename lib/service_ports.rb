@@ -4,6 +4,10 @@ module Convex
     ACCEPTABLE_ADDRESSES = %w(127.0.0.1)
   end
   
+  module RedisService
+    PORT = 6379
+  end
+  
   module ConvexFocusingService
     PORT = 2689 # = CNVX
   end
