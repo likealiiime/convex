@@ -7,11 +7,23 @@
 		<title>Convex Dashboard</title>
 	</head>
 	<body>
-		<section id="header">
-			<img src="images/site/convex.png" alt="convex" title="Convex" />
-		</section>
-		<section id="body">
-			<h1>1234:1234 Convexd</h1>
-		</section>
+		<div id="header">
+			<img src="/images/site/convex.png" alt="convex" title="Convex" />
+		</div>
+		<div id="body">
+			<% @services.each do |service| %>
+			<section>
+				<header>
+					<nav><ul>
+						<li><a href="#"><%=service[:running] ? 'Stop' : 'Start'%></a></li>
+					</ul></nav>
+					<h1>
+						<span class="<%=class_for_service_running service[:name]%>"><%=service[:address]%></span>
+						<%=service[:name]%>
+					</h1>
+				</header>
+			</section>
+			<% end %>
+		</div>
 	</body>
 </html>

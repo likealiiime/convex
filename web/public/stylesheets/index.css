@@ -14,6 +14,55 @@ body {
 	color: #AAA;
 }
 
+#body > section {
+	display: block;
+	width: 100%;
+	border-bottom: 1px solid #EEE;
+}
+#body > section > header {
+	display: block;
+	width: 100%;
+}
+
+#body > section > header > h1 {
+	width: 500px;
+}
+
+#body > section > header > nav > ul {
+	margin: 0;
+	float: right;
+	list-style: none;
+}
+#body > section > header > nav > ul > li {
+	margin: 0;
+	float: left;
+	font-size: 22px;
+}
+
 h1 {
 	font: 36px/36px 'QuicksandBook', Helvetica, sans-serif;
+}
+
+a {
+	color: #666;
+	background-color: #EEE;
+	text-decoration: none;
+	padding: 8px 5px 5px 5px;
+	-webkit-border-radius: 3px;
+}
+a:hover {
+	background-color: #FFFFC4;
+}
+.running {
+	color: #8FD44F;
+	background-color: #DDFFD2;
+	padding: 8px 8px 0 8px;
+	-webkit-border-radius: 3px;
+}
+
+.notRunning {
+	color: #D65B5E;
+	background-color: #FDD9DA;
+	padding: 8px 8px 0 8px;
+	-webkit-border-radius: 3px;
 }
