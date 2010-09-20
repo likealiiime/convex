@@ -5,7 +5,7 @@
 
 Gem::Specification.new do |s|
   s.name = %q{convex}
-  s.version = "1.0.0"
+  s.version = "1.1.0"
 
   s.required_rubygems_version = Gem::Requirement.new(">= 0") if s.respond_to? :required_rubygems_version=
   s.authors = ["Sherr\303\263d Faulks"]
@@ -14,8 +14,10 @@ Gem::Specification.new do |s|
   s.email = %q{dev@styledon.com}
   s.files = [
     ".gitignore",
+     "Rakefile",
      "VERSION",
      "chronosd",
+     "convex.gemspec",
      "convexd",
      "doc/Calais.graffle",
      "doc/Convex Sequence.graffle",
@@ -73,91 +75,19 @@ Gem::Specification.new do |s|
      "lib/engine.rb",
      "lib/extensions.rb",
      "lib/logging.rb",
-     "lib/service_ports.rb",
-     "redis/.gitignore",
-     "redis/BETATESTING.txt",
-     "redis/BUGS",
-     "redis/COPYING",
-     "redis/Changelog",
-     "redis/Makefile",
-     "redis/README",
-     "redis/TODO",
-     "redis/adlist.c",
-     "redis/adlist.h",
-     "redis/ae.c",
-     "redis/ae.h",
-     "redis/ae_epoll.c",
-     "redis/ae_kqueue.c",
-     "redis/ae_select.c",
-     "redis/anet.c",
-     "redis/anet.h",
-     "redis/client-libraries/README",
-     "redis/config.h",
-     "redis/dict.c",
-     "redis/dict.h",
-     "redis/fmacros.h",
-     "redis/linenoise.c",
-     "redis/linenoise.h",
-     "redis/lzf.h",
-     "redis/lzfP.h",
-     "redis/lzf_c.c",
-     "redis/lzf_d.c",
-     "redis/mkreleasehdr.sh",
-     "redis/pqsort.c",
-     "redis/pqsort.h",
-     "redis/redis-benchmark.c",
-     "redis/redis-check-aof.c",
-     "redis/redis-check-dump.c",
-     "redis/redis-cli.c",
-     "redis/redis.c",
-     "redis/redis.h",
-     "redis/sds.c",
-     "redis/sds.h",
-     "redis/sha1.c",
-     "redis/sha1.h",
-     "redis/solarisfixes.h",
-     "redis/start",
-     "redis/staticsymbols.h",
-     "redis/stop",
-     "redis/tests/assets/default.conf",
-     "redis/tests/integration/aof.tcl",
-     "redis/tests/integration/replication.tcl",
-     "redis/tests/support/redis.tcl",
-     "redis/tests/support/server.tcl",
-     "redis/tests/support/test.tcl",
-     "redis/tests/support/tmpfile.tcl",
-     "redis/tests/support/util.tcl",
-     "redis/tests/test_helper.tcl",
-     "redis/tests/unit/auth.tcl",
-     "redis/tests/unit/basic.tcl",
-     "redis/tests/unit/expire.tcl",
-     "redis/tests/unit/other.tcl",
-     "redis/tests/unit/protocol.tcl",
-     "redis/tests/unit/sort.tcl",
-     "redis/tests/unit/type/hash.tcl",
-     "redis/tests/unit/type/list.tcl",
-     "redis/tests/unit/type/set.tcl",
-     "redis/tests/unit/type/zset.tcl",
-     "redis/utils/build-static-symbols.tcl",
-     "redis/utils/redis-copy.rb",
-     "redis/utils/redis-sha1.rb",
-     "redis/utils/redis_init_script",
-     "redis/zipmap.c",
-     "redis/zipmap.h",
-     "redis/zmalloc.c",
-     "redis/zmalloc.h"
+     "lib/service_ports.rb"
   ]
   s.homepage = %q{http://github.com/StyledOn/convex}
   s.rdoc_options = ["--charset=UTF-8"]
   s.require_paths = ["lib"]
-  s.rubygems_version = %q{1.3.6}
+  s.rubygems_version = %q{1.3.7}
   s.summary = %q{CONVersation EXtractor}
 
   if s.respond_to? :specification_version then
     current_version = Gem::Specification::CURRENT_SPECIFICATION_VERSION
     s.specification_version = 3
 
-    if Gem::Version.new(Gem::RubyGemsVersion) >= Gem::Version.new('1.2.0') then
+    if Gem::Version.new(Gem::VERSION) >= Gem::Version.new('1.2.0') then
     else
     end
   else
