@@ -20,11 +20,11 @@ module Convex
   @@booted = false
   @@next_engine_code = nil
   
-  LIB_PATH = File.dirname(__FILE__)
-  LOG_PATH = File.join(LIB_PATH, '..', 'log')
-  TMP_PATH = File.join(LIB_PATH, '..', 'tmp')
-  PIDS_PATH = File.join(LIB_PATH, '..', 'pids')
-  LENSES_PATH = File.join(LIB_PATH, '..', 'lenses')
+  ROOT_PATH = File.expand_path(File.join(File.dirname(__FILE__), '..'))
+  %w(lib log tmp pids lenses).each do |path|
+    Convex.const_set("#{path.upcase}_PATH", File.join(ROOT_PATH, path))
+  end
+  
   
   def self.lenses; @@lenses; end
   def self.env; @@env; end
@@ -108,3 +108,5 @@ module Convex
     def forgetful?; mode == :forgetful; end
   end
 end
+
+CONVEX_ROOT = Convex::ROOT_PATH
