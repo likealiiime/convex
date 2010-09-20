@@ -12,3 +12,5 @@ begin
 rescue LoadError
   puts "Jeweler not available. Install it with: gem install jeweler"
 end
+
+namespace :db do; task :deploy do; end; end
