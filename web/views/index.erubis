@@ -3,7 +3,9 @@
 	<head>
 		<meta charset="UTF-8" />
 		<link rel="stylesheet" href="/stylesheets/quicksand.css" type="text/css" media="screen" title="index" charset="utf-8" />
-		<link rel="stylesheet" href="/stylesheets/index.css" type="text/css" media="screen" title="index" charset="utf-8" />
+		<link rel="stylesheet" href="/stylesheets/application.css" type="text/css" media="screen" title="index" charset="utf-8" />
+		<script type="text/javascript" src="/javascripts/mootools-1.2.5-core-yc.js"></script>
+		<script type="text/javascript" src="/javascripts/application.js"></script>
 		<title>Convex Dashboard</title>
 	</head>
 	<body>
@@ -15,7 +17,8 @@
 			<section>
 				<header>
 					<nav><ul>
-						<li><a href="#"><%=service[:running] ? 'Stop' : 'Start'%></a></li>
+						<% verb = service[:running] ? 'Stop' : 'Start'%>
+						<li><a href="#" class="<%=verb.downcase%>sService" title="<%="#{verb} #{service[:name]}"%>" data-service="<%=service[:name]%>"><%=verb%></a></li>
 					</ul></nav>
 					<h1>
 						<span class="<%=class_for_service_running service[:name]%>"><%=service[:address]%></span>
