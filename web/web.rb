@@ -1,7 +1,12 @@
-require 'rubygems'
-require 'sinatra'
+require 'sinatra/base'
 require 'erubis'
 
-get '/' do
-  erubis :index
+module Convex
+  class Web < Sinatra::Base
+    set :root, File.dirname(__FILE__)
+    
+    get '/' do
+      erubis :index
+    end
+  end
 end
