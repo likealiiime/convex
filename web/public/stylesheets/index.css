@@ -1,0 +1,19 @@
+body {
+	padding: 50px;
+}
+
+#header {
+	padding-bottom: 25px;
+	border-bottom: 3px solid #BBB;
+}
+
+#body {
+	padding-top: 25px;
+	font-size: 12px;
+	font: 12px/1.4em 'QuicksandLight', Helvetica, sans-serif;
+	color: #AAA;
+}
+
+h1 {
+	font: 36px/36px 'QuicksandBook', Helvetica, sans-serif;
+}

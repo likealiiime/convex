@@ -1,0 +1,17 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="UTF-8" />
+		<link rel="stylesheet" href="/stylesheets/quicksand.css" type="text/css" media="screen" title="index" charset="utf-8" />
+		<link rel="stylesheet" href="/stylesheets/index.css" type="text/css" media="screen" title="index" charset="utf-8" />
+		<title>Convex Dashboard</title>
+	</head>
+	<body>
+		<section id="header">
+			<img src="images/site/convex.png" alt="convex" title="Convex" />
+		</section>
+		<section id="body">
+			<h1>1234:1234 Convexd</h1>
+		</section>
+	</body>
+</html>
