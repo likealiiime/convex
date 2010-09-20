@@ -4,11 +4,21 @@ require 'sinatra/reloader'
 
 module Convex
   class Web < Sinatra::Base
+    class Service < Struct.new(:name, :command)
+      def stop_command
+        "#{File.join(Convex::ROOT_PATH, self.command)} stop"
+      end
+    end
+    Services = {
+      :Convex => Convex::Web::Service.new(:Convex, 'convexd')
+    }
+    
     set :root, File.dirname(__FILE__)
     
     configure :development do
       register Sinatra::Reloader
       require File.join(File.dirname(__FILE__), '..', 'lib', 'convex')
+      require 'ruby-debug'
     end
     configure :production do
       require 'convex'
@@ -40,6 +50,12 @@ module Convex
         }
       ]
       erubis :index
+    end
+    
+    post '/service/:name/stop' do |name|
+      name = name.to_sym
+      command = Convex::Web::Services[name].stop_command
+      puts command
     end
   end
 end
