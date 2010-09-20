@@ -8,6 +8,7 @@ begin
     gemspec.homepage = "http://github.com/StyledOn/convex"
     gemspec.authors = ["Sherród Faulks"]
     gemspec.require_paths = ["lib"]
+    #gemspec.add_dependency "", # version
   end
 rescue LoadError
   puts "Jeweler not available. Install it with: gem install jeweler"
