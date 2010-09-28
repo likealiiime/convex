@@ -9,7 +9,7 @@ require 'system_timer'
 require 'json/ext' # This is the C version; much faster!
 
 # Convex libraries
-%w(logging extensions calais_service engine datum_type datum service_ports).each do |lib|
+%w(logging extensions calais_service engine datum_type datum service_ports command).each do |lib|
   require File.join(File.dirname(__FILE__), lib)
 end
 
@@ -25,7 +25,6 @@ module Convex
     Convex.const_set("#{path.upcase}_PATH", File.join(ROOT_PATH, path))
   end
   
-  
   def self.lenses; @@lenses; end
   def self.env; @@env; end
   def self.db; @@db; end
@@ -33,18 +32,19 @@ module Convex
   
   def self.boot!
     return if booted?
-    mode = $*.empty? ? :forgetful : $*.first.to_sym
+    mode = ARGV.empty? ? :forgetful : ARGV.first.to_sym
     
     raise Environment::CannotBootIntoHeadlessModeError.new("Cannot Convex.boot! into headless mode. Call Convex.headless! instead.") if mode == :headless
     @@env = Convex::Environment.new(mode)
     Convex::Logging.open_log_with_name(env.mode)
     @@lenses = []
     
-    Convex.info "Starting Convex in #{env.mode.to_s.upcase} mode..."
+    start = Time.now
+    Convex.info "Starting Convex in #{env.to_s.upcase} mode..."
     @@db = new_redis_connection
     debug "Connected to Redis"
     @@db.select env.code
-    debug "SELECTed #{env.mode} database, code #{env.code}"
+    debug "SELECTed #{env} database, code #{env.code}"
     @@db.setnx '_lachesis', 0
     if env.forgetful?
       warn "Performing FLUSHDB"
@@ -53,17 +53,19 @@ module Convex
     
     debug "Booting..."
     Convex::DatumType.load!
-    log_newline
     @@booted = true
+    Convex.info("Started in %.3f seconds" % (Time.now - start))
   end
   
   def self.headless!
     return if booted?
+    start = Time.now
     Convex.info "Starting Convex in HEADLESS mode..."
     @@env = Convex::Environment.new(:headless)
     debug "Booting..."
     Convex::DatumType.load!
     @@booted = true
+    Convex.info("Started in %.3f seconds" % (Time.now - start))
   end
   
   def self.next_engine_code
@@ -106,6 +108,7 @@ module Convex
     def code; mode == :headless ? -1 : MODES.index(mode); end
     def development?; mode == :development || mode == :forgetful; end
     def forgetful?; mode == :forgetful; end
+    def to_s; mode.to_s; end
   end
 end
 
