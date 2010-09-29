@@ -123,6 +123,7 @@ elsif ARGV.first == 'prefspace'
     #labels << "A#{user_id},888888,0,#{i},9" if i < extreme_n || i > (n - extreme_n)
     i += 1
   }
+  max_x += 0.1; max_y += 0.1
   now = Time.now
   params = {
     :cht  => 's',
