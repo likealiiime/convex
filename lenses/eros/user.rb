@@ -3,25 +3,16 @@ module Convex
     class User
       include Convex::CustomizedLogging
 
-      attr_reader :data_json, :topics, :id
+      attr_reader :topics, :id
   
       def initialize(id)
         @id = id
-        cache_data!
+        @topics = redis_topics
       end
-  
-      def cache_data!
-        @topics, @data_json = [], []
-        Convex.db.smembers(self.redis_key).each do |datum_id|
-          json = Convex.db.hget 'lens-chronos-id_index', datum_id
-          datum = JSON.parse(json)
-          @data_json << json
-          @topics << datum.topic
-        end
-      end
-      
+
       def self.redis_key_for(id); Convex::Eros::Lens.redis_key_for_user_set(id); end
       def redis_key; self.class.redis_key_for(self.id); end
+      def redis_topics_key; Convex::Eros::Lens.redis_key_for_user_topics(id); end
       
       def tanimoto_against(opp)
         #puts "Player (##{self.id}) has #{self.topics.count} topics"
@@ -54,9 +45,10 @@ module Convex
         return score
       end
       
-      def count; @data_json.count; end
+      def redis_topics; Convex.db.smembers Convex::Eros::Lens.redis_key_for_user_topics(id); end
+      def count; topics.count end
       
-      def to_s; "User ##{self.id}/#{self.topics.count}"; end
+      def to_s; "##{self.id}/#{self.count}"; end
       
     end
   end
