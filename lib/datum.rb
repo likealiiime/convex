@@ -53,5 +53,9 @@ module Convex
     def self.json_create(object)
       return self.new(object['attributes'])
     end
+    
+    def has_id_and_creator?
+      self.creator_id.to_i != 0 && self.id.to_i != 0
+    end
   end
 end
