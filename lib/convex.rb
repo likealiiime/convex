@@ -54,7 +54,7 @@ module Convex
     debug "Booting..."
     Convex::DatumType.load!
     @@booted = true
-    Convex.info("Started in %.3f seconds" % (Time.now - start))
+    Convex.info("Started Convex in %.3f seconds" % (Time.now - start))
   end
   
   def self.headless!
@@ -65,7 +65,7 @@ module Convex
     debug "Booting..."
     Convex::DatumType.load!
     @@booted = true
-    Convex.info("Started in %.3f seconds" % (Time.now - start))
+    Convex.info("Started Convex in %.3f seconds" % (Time.now - start))
   end
   
   def self.next_engine_code
