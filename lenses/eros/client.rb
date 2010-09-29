@@ -6,7 +6,7 @@ require 'httparty'
 require 'fileutils'
 
 Convex.boot!
-#Convex.force_debug_logging!
+Convex.force_debug_logging!
 ARGV.shift
 
 def puts_ordered_ids_and_numbers(set, no_data_message="There does not seem to be enough data!")
@@ -27,24 +27,49 @@ if ARGV.first == 'count'
     key = Convex::Eros::User.redis_key_for id
     puts "##{id}:\t#{Convex.db.scard(key)}"
   }
-elsif ARGV.first == 'most'
-  ARGV.shift
-  puts_ordered_ids_and_numbers Convex::Eros::Lens.n_ids_and_counts_with_most_data(10)
-elsif ARGV.first == 'mostx'
-  ARGV.shift
-  puts_ordered_ids_and_numbers Convex::Eros::Lens.n_ids_and_counts_with_most_data(10, ARGV)
-elsif ARGV.first == 'test'
+
+### Testing ###
+elsif ARGV.first == 'vs'
   ARGV.shift
   ply = Convex::Eros::User.new(ARGV.shift)
   opp = Convex::Eros::User.new(ARGV.shift)
-  ply.tanimoto_against opp
-elsif ARGV.first == 'index'
+  puts "T = %.8f" % ply.tanimoto_against(opp)
+  puts "P = %.8f" % ply.pearson_against(opp)
+elsif ARGV.first == 'test!'
   ARGV.shift
-  Convex::Eros::Lens.index_tests_for_id(ARGV.shift)
-elsif ARGV.first == 'index_all!'
-  Convex::Eros::Lens.index_all_tests!
-elsif ARGV.first == 'regenerate_all_topics!'
-  Convex::Eros::Lens.regenerate_all_topics!
+  Convex::Eros::Lens.test!(ARGV.shift)
+elsif ARGV.first == 'test_all!'
+  ARGV.shift
+  Convex::Eros::Lens.test_all!(ARGV.shift)
+  
+### Rating ###
+elsif ARGV.first == 'rate!'
+  ARGV.shift
+  Convex::Eros::Lens.rate!(ARGV.shift)
+elsif ARGV.first == 'rate_all!'
+  ARGV.shift
+  Convex::Eros::Lens.rate_all!(ARGV.shift)
+  
+### Evaluation ###
+elsif ARGV.first == 'evaluate!'
+  ARGV.shift
+  Convex::Eros::Lens.evaluate!(ARGV.shift)
+elsif ARGV.first == 'evaluate_all!'
+  ARGV.shift
+  Convex::Eros::Lens.evaluate_all!
+
+### Topics ###
+elsif ARGV.first == 'theme!'
+  ARGV.shift
+  Convex::Eros::Lens.theme!(ARGV.shift)
+elsif ARGV.first == 'theme_all!'
+  ARGV.shift
+  Convex::Eros::Lens.theme_all!
+
+elsif ARGV.first == 'test_all!'
+  Convex::Eros::Lens.test_all!
+
+### Ranking ###
 elsif ARGV.first == 'best'
   ARGV.shift
   my_id = ARGV.shift
@@ -58,6 +83,14 @@ elsif ARGV.first == 'best'
   else
     Convex::Eros::Lens.warn "User ##{my_id} is not indexed!"
   end
+elsif ARGV.first == 'most'
+  ARGV.shift
+  puts_ordered_ids_and_numbers Convex::Eros::Lens.n_ids_and_counts_with_most_data(10)
+elsif ARGV.first == 'mostx'
+  ARGV.shift
+  puts_ordered_ids_and_numbers Convex::Eros::Lens.n_ids_and_counts_with_most_data(10, ARGV)
+
+### Prefspace ###
 elsif ARGV.first == 'prefspace'
   ARGV.shift
   lens = Convex::Eros::Lens
@@ -65,17 +98,18 @@ elsif ARGV.first == 'prefspace'
   n, i, extreme_n = 100, 0, 5
   x_id,x, y_id,y = ARGV.shift,[], ARGV.shift,[]
   max_x, max_y = 0, 0
-  best_ids = (lens.best_n_ids_and_scores_for_id(n, x_id, :integerize_ids) | lens.best_n_ids_and_scores_for_id(n, y_id, :integerize_ids))[0...n].sort { |a,b| a.last <=> b.last }.collect(&:first)
+  best_ids = (lens.best_n_ids_and_scores_for_id(n, x_id, :similarities, :integerize_ids) | lens.best_n_ids_and_scores_for_id(n, y_id, :similarities, :integerize_ids))
+  best_ids = best_ids[0...n].sort { |a,b| a.last <=> b.last }.collect(&:first)
   labels = ['c,63A7FF,0,-1,10']
+  
   best_ids.each { |user_id|
     next if user_id == x_id.to_i || user_id == y_id.to_i
-    key = lens.redis_key_for_user_test_index(user_id)
     
-    _x = lens.score_for_player_id_against_opponent_id(user_id, x_id)
+    _x = lens.similarity_between(user_id, x_id)
     x << _x
     max_x = _x if _x > max_x
     
-    _y = lens.score_for_player_id_against_opponent_id(user_id, y_id)
+    _y = lens.similarity_between(user_id, y_id)
     y << _y
     max_y = _y if _y > max_y
     
