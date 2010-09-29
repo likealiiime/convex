@@ -20,7 +20,7 @@ module Convex
       extra_stream.puts(s) if extra_stream
     end
     
-    def force_debug_logging
+    def force_debug_logging!
       @@log_should_debug = true
       #debug "Debug logging forced"
     end

@@ -11,7 +11,7 @@ module Convex
 end
 
 Convex.boot!
-Convex.force_debug_logging
+Convex.force_debug_logging!
 Thread.abort_on_exception = true
 
 chronos_thread = Thread.new {
