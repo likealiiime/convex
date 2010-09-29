@@ -6,15 +6,33 @@ require 'httparty'
 require 'fileutils'
 
 Convex.boot!
-Convex.force_debug_logging!
+#Convex.force_debug_logging!
 ARGV.shift
 
-if ARGV.first == 'count_data'
+def puts_ordered_ids_and_numbers(set, no_data_message="There does not seem to be enough data!")
+  if set.count > 0
+    i = 1
+    set.each do |id, x|
+      puts "%s#%d:\t%d" % ["#{i}.".ljust(5), id, x]
+      i += 1
+    end
+  else
+    Convex::Eros::Lens.warn no_data_message
+  end
+end
+
+if ARGV.first == 'count'
   ARGV.shift
   ARGV.each { |id|
     key = Convex::Eros::User.redis_key_for id
     puts "##{id}:\t#{Convex.db.scard(key)}"
   }
+elsif ARGV.first == 'most'
+  ARGV.shift
+  puts_ordered_ids_and_numbers Convex::Eros::Lens.n_ids_and_counts_with_most_data(10)
+elsif ARGV.first == 'mostx'
+  ARGV.shift
+  puts_ordered_ids_and_numbers Convex::Eros::Lens.n_ids_and_counts_with_most_data(10, ARGV)
 elsif ARGV.first == 'test'
   ARGV.shift
   ply = Convex::Eros::User.new(ARGV.shift)
@@ -25,6 +43,8 @@ elsif ARGV.first == 'index'
   Convex::Eros::Lens.index_tests_for_id(ARGV.shift)
 elsif ARGV.first == 'index_all!'
   Convex::Eros::Lens.index_all_tests!
+elsif ARGV.first == 'regenerate_all_topics!'
+  Convex::Eros::Lens.regenerate_all_topics!
 elsif ARGV.first == 'best'
   ARGV.shift
   my_id = ARGV.shift
@@ -38,7 +58,7 @@ elsif ARGV.first == 'best'
   else
     Convex::Eros::Lens.warn "User ##{my_id} is not indexed!"
   end
-elsif ARGV.first == 'prefspace_image'
+elsif ARGV.first == 'prefspace'
   ARGV.shift
   lens = Convex::Eros::Lens
   
@@ -79,13 +99,15 @@ elsif ARGV.first == 'prefspace_image'
     :chg  => "50,50"
   }
   response = HTTParty.post("http://chart.apis.google.com/chart", { :body => params })
+  path = File.join(Convex::TMP_PATH, 'eros', 'prefspace')
+  FileUtils.mkdir_p(path)
+  path = File.join(path, "#{now.to_i}_#{x_id}vs#{y_id}.")
   if response.code == 200
-    path = File.join(Convex::TMP_PATH, 'eros', 'prefspace_images')
-    FileUtils.mkdir_p(path)
-    path = File.join(path, "#{now.to_i}.png")
-    File.open(path, 'w') { |f| f.write response.body }
-    lens.info "Wrote chart to #{path}"
+    File.open(path << 'png', 'w') { |f| f.write response.body }
+    lens.info "Wrote chart PNG to #{path}"
   else
+    File.open(path << 'html', 'w') { |f| f.write response.body }
+    lens.warn "Request failed! Wrote HTML response to #{path}"
   end
 else
   raise ArgumentError.new("Unknown Eros client command: #{ARGV.join(' ')}")
