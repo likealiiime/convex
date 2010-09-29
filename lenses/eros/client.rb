@@ -2,18 +2,17 @@
 _here = File.dirname(__FILE__)
 require File.join(_here, '..', '..', 'lib', 'convex')
 require File.join(_here, 'lens')
-require File.join(_here, 'user')
+require 'httparty'
+require 'fileutils'
 
 Convex.boot!
+Convex.force_debug_logging!
 ARGV.shift
 
-def users_from(ids)
-end
-
-if ARGV.first == 'count'
+if ARGV.first == 'count_data'
   ARGV.shift
   ARGV.each { |id|
-    key = Convex::Eros::User.key_for id
+    key = Convex::Eros::User.redis_key_for id
     puts "##{id}:\t#{Convex.db.scard(key)}"
   }
 elsif ARGV.first == 'test'
@@ -21,4 +20,73 @@ elsif ARGV.first == 'test'
   ply = Convex::Eros::User.new(ARGV.shift)
   opp = Convex::Eros::User.new(ARGV.shift)
   ply.tanimoto_against opp
+elsif ARGV.first == 'index'
+  ARGV.shift
+  Convex::Eros::Lens.index_tests_for_id(ARGV.shift)
+elsif ARGV.first == 'index_all!'
+  Convex::Eros::Lens.index_all_tests!
+elsif ARGV.first == 'best'
+  ARGV.shift
+  my_id = ARGV.shift
+  set = Convex::Eros::Lens.best_n_ids_and_scores_for_id(10, my_id)
+  if set.count > 0
+    i = 1
+    set.each do |match_id, score|
+      puts "%s#%d:\t%.4f" % ["#{i}.".ljust(5), match_id, score.to_f]
+      i += 1
+    end
+  else
+    Convex::Eros::Lens.warn "User ##{my_id} is not indexed!"
+  end
+elsif ARGV.first == 'prefspace_image'
+  ARGV.shift
+  lens = Convex::Eros::Lens
+  
+  n, i, extreme_n = 100, 0, 5
+  x_id,x, y_id,y = ARGV.shift,[], ARGV.shift,[]
+  max_x, max_y = 0, 0
+  best_ids = (lens.best_n_ids_and_scores_for_id(n, x_id, :integerize_ids) | lens.best_n_ids_and_scores_for_id(n, y_id, :integerize_ids))[0...n].sort { |a,b| a.last <=> b.last }.collect(&:first)
+  labels = ['c,63A7FF,0,-1,10']
+  best_ids.each { |user_id|
+    next if user_id == x_id.to_i || user_id == y_id.to_i
+    key = lens.redis_key_for_user_test_index(user_id)
+    
+    _x = lens.score_for_player_id_against_opponent_id(user_id, x_id)
+    x << _x
+    max_x = _x if _x > max_x
+    
+    _y = lens.score_for_player_id_against_opponent_id(user_id, y_id)
+    y << _y
+    max_y = _y if _y > max_y
+    
+    #labels << "A#{user_id},888888,0,#{i},9" if i < extreme_n || i > (n - extreme_n)
+    i += 1
+  }
+  now = Time.now
+  params = {
+    :cht  => 's',
+    :chs  => '547x547',
+    :chma => '25,25,25,25',
+    :chtt => "##{x_id} vs. ##{y_id} - Prefspace of Best #{n}|#{now.strftime('%b %d, %Y at %I:%M:%S %p')}",
+    :chd  => 't:' << x.join(',') << '|' << y.join(','),
+    :chds => "0,#{max_x},0,#{max_y}",
+    :chm  => labels.join('|'),
+    :chxt => 'x,y,r,t,x,y,x,y',
+    :chxr => (0..3).collect { |i| "#{i},0,#{[max_y,max_y].max},0.1" }.join('|'),
+    :chxl => "4:|Least Like ##{x_id}|Most Like ##{x_id}|5:|Least Like ##{y_id}|Most Like ##{y_id}|6:|User ##{x_id}|7:|User ##{y_id}",
+    :chxp => "6,50|7,50",
+    :chxs => '6,000000,12|7,000000,12',
+    :chg  => "50,50"
+  }
+  response = HTTParty.post("http://chart.apis.google.com/chart", { :body => params })
+  if response.code == 200
+    path = File.join(Convex::TMP_PATH, 'eros', 'prefspace_images')
+    FileUtils.mkdir_p(path)
+    path = File.join(path, "#{now.to_i}.png")
+    File.open(path, 'w') { |f| f.write response.body }
+    lens.info "Wrote chart to #{path}"
+  else
+  end
+else
+  raise ArgumentError.new("Unknown Eros client command: #{ARGV.join(' ')}")
 end
