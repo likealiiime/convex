@@ -12,7 +12,7 @@ module Convex
   
       def cache_data!
         @topics, @data_json = [], []
-        Convex.db.smembers(self.key).each do |datum_id|
+        Convex.db.smembers(self.redis_key).each do |datum_id|
           json = Convex.db.hget 'lens-chronos-id_index', datum_id
           datum = JSON.parse(json)
           @data_json << json
@@ -20,8 +20,8 @@ module Convex
         end
       end
       
-      def self.key_for(id); Convex::Eros::Lens.redis_key_for_user_set(id); end
-      def key; self.class.key_for(self.id); end
+      def self.redis_key_for(id); Convex::Eros::Lens.redis_key_for_user_set(id); end
+      def redis_key; self.class.redis_key_for(self.id); end
       
       def tanimoto_against(opp)
         #puts "Player (##{self.id}) has #{self.topics.count} topics"
@@ -50,13 +50,13 @@ module Convex
         #puts "||B||^2 = %.1f" % b.square_magnitude
         score = (a ** b).to_f / (a.square_magnitude + b.square_magnitude - a ** b).to_f
         #puts "T(A,B) = %.4f" % score
-        info("T(%s, %s) = %.4f in %.1f seconds" % [self, opp, score, (Time.now - start)])
+        debug("T(%s, %s) = %.4f in %.3f seconds" % [self, opp, score, (Time.now - start)])
         return score
       end
       
       def count; @data_json.count; end
       
-      def to_s; "##{self.id}/#{self.topics.count}"; end
+      def to_s; "User ##{self.id}/#{self.topics.count}"; end
       
     end
   end
