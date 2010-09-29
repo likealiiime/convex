@@ -214,9 +214,9 @@ module Convex
       end
       
       ### Ranking ###
-      def self.best_n_ids_and_scores_for_id(n, my_id, zset = :similarities, should_integerize_ids = false)
-        key = send("redis_key_for_user_#{zset}".to_sym, my_id)
-        cast = should_integerize_ids ? :to_i : :to_s
+      def self.best_n_ids_and_scores_for_id(n, my_id, options={})
+        key = send("redis_key_for_user_#{options[:method] || 'similarities'}".to_sym, my_id)
+        cast = options[:integerize_ids] ? :to_i : :to_s
         Convex.db.zrevrange(key, 0, n).collect { |match_id|
           next if match_id == my_id
           [match_id.send(cast), Convex.db.zscore(key, match_id).to_f]

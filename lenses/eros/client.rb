@@ -21,6 +21,18 @@ def puts_ordered_ids_and_numbers(set, no_data_message="There does not seem to be
   end
 end
 
+def puts_ordered_ids_and_scores(set, no_data_message="User has no data!")
+  if set.count > 0
+    i = 1
+    set.each do |match_id, score|
+      puts "%s#%d:\t%.4f" % ["#{i}.".ljust(5), match_id, score.to_f]
+      i += 1
+    end
+  else
+    Convex::Eros::Lens.warn no_data_message
+  end
+end
+
 if ARGV.first == 'count'
   ARGV.shift
   ARGV.each { |id|
@@ -73,16 +85,11 @@ elsif ARGV.first == 'test_all!'
 elsif ARGV.first == 'best'
   ARGV.shift
   my_id = ARGV.shift
-  set = Convex::Eros::Lens.best_n_ids_and_scores_for_id(10, my_id)
-  if set.count > 0
-    i = 1
-    set.each do |match_id, score|
-      puts "%s#%d:\t%.4f" % ["#{i}.".ljust(5), match_id, score.to_f]
-      i += 1
-    end
-  else
-    Convex::Eros::Lens.warn "User ##{my_id} is not indexed!"
-  end
+  puts_ordered_ids_and_scores Convex::Eros::Lens.best_n_ids_and_scores_for_id(10, my_id), "User has not been evaluated!"
+elsif ARGV.first == 'bestx'
+  ARGV.shift
+  my_id = ARGV.shift
+  puts_ordered_ids_and_scores Convex::Eros::Lens.best_n_ids_and_scores_for_id(10, my_id, :excluding => ARGV), "User has not been evaluated!"
 elsif ARGV.first == 'most'
   ARGV.shift
   puts_ordered_ids_and_numbers Convex::Eros::Lens.n_ids_and_counts_with_most_data(10)
@@ -98,7 +105,7 @@ elsif ARGV.first == 'prefspace'
   n, i, extreme_n = 100, 0, 5
   x_id,x, y_id,y = ARGV.shift,[], ARGV.shift,[]
   max_x, max_y = 0, 0
-  best_ids = (lens.best_n_ids_and_scores_for_id(n, x_id, :similarities, :integerize_ids) | lens.best_n_ids_and_scores_for_id(n, y_id, :similarities, :integerize_ids))
+  best_ids = (lens.best_n_ids_and_scores_for_id(n, x_id, { :method => :similarities, :integerize_ids => true }) | lens.best_n_ids_and_scores_for_id(n, y_id, { :method => :similarities, :integerize_ids => true }))
   best_ids = best_ids[0...n].sort { |a,b| a.last <=> b.last }.collect(&:first)
   labels = ['c,63A7FF,0,-1,10']
   
