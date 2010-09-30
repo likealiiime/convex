@@ -78,6 +78,21 @@ elsif ARGV.first == 'term_all!'
   ARGV.shift
   Convex::Eros::Lens.term_all!
 
+### Word Counts ###
+elsif ARGV.first == 'wcounts'
+  ARGV.shift
+  key, i = Convex::Eros::Lens.redis_key_for_user_word_counts(ARGV.shift), 1
+  words = Convex.db.zrange(key, 0, Convex.db.zcard(key))
+  puts "#{words.count} words total"
+  words.each do |word|
+    puts "#{i}.".ljust(6) << ' ' << word.ljust(16) << ' ' << Convex.db.zscore(key, word)
+    i += 1
+  end
+  puts "#{words.count} words total"
+elsif ARGV.first == 'wcount!'
+  ARGV.shift
+  Convex::Eros::Lens.wcount!(ARGV.shift)
+
 ### Topics ###
 elsif ARGV.first == 'theme!'
   ARGV.shift

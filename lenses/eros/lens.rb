@@ -8,6 +8,7 @@ module Convex
       def self.redis_key_for_user_set(id); "lens-eros-#{id}"; end
       def self.redis_key_for_user_topics(id); "lens-eros-#{id}_topics"; end # Set
       def self.redis_key_for_user_words(id); "lens-eros-#{id}_words"; end # List
+      def self.redis_key_for_user_word_counts(id); "lens-eros-#{id}_word_counts"; end # ZSet
       def self.redis_key_for_user_ratings(id); "lens-eros-#{id}_test_rank"; end # ZSet
       def self.redis_key_for_user_similarities(id); "lens-eros-#{id}_similarity_index"; end # ZSet
       
@@ -21,7 +22,9 @@ module Convex
           user_id = datum.creator_id.to_i
           engine.db.sadd(redis_key_for_user_set(user_id), datum.id)
           store_topic_using_datum(datum)
-          store_words_using_datum(datum)
+          words = store_words_using_datum(datum)
+          update_word_counts_using_words_for_user_id(words, user_id)
+          
           index[user_id] ||= 0
           index[user_id] += 1
           debug "[#{user_id}] SADDed #{datum}"
@@ -53,7 +56,27 @@ module Convex
         JSON.parse(Convex.db.hget('lens-chronos-id_index', id))
       end
       
+      ### Word Counts ###
+      def self.wcount!(id)
+        start, i, w_key, wc_key = Time.now, 0, redis_key_for_user_words(id), redis_key_for_user_word_counts(id)
+        words = Convex.db.lrange(w_key, 0, Convex.db.llen(w_key))
+        Convex.db.del wc_key
+        update_word_counts_using_words_for_user_id(words, id)
+        minutes = (Time.now - start) / 60.0
+        info("Reset %d word counts for #%d in %.1f minutes" % [words.count, id, minutes])
+      end
+      
+      def self.update_word_counts_using_words_for_user_id(words, id)
+        key = redis_key_for_user_word_counts(id)
+        words.each { |word| Convex.db.zincrby(key, 1, word) }
+        info("Updated #{words.count} word counts for ##{id}")
+      end
+      
       ### Words ###
+      COMMON_WORDS_TO_SKIP = %w(and the or of to from in out it was is that was a an as at if by this for those all on what with so not its it's here here's have & but)
+      WORD_CONTENTS_TO_SKIP = /<|>|=|\||\+|--/ # forward slash is not included because we don't want to omit http://...
+      WORD_CONTENTS_TO_STRIP = /:|"|,|\?|&ldquo;|&rdquo;|&nbsp;|_|\(|\)/
+      
       def self.term_all!
         start, ids = Time.now, all_user_ids
         ids.each { |id| term!(id) }
@@ -73,14 +96,22 @@ module Convex
           i += 1
         end
         info("Generated %d words from %d data for #%d in %.1f seconds" % [ Convex.db.llen(key), datum_ids.count, my_id, (Time.now - start) ])
+        wcount!(my_id)
       end
       
       def self.store_words_using_datum(datum)
         return unless datum.has_id_and_creator?
         key = redis_key_for_user_words(datum.creator_id)
-        datum.value.to_s.split(' ').reject { |s| s.to_s.strip == '' }.each { |word|
-          Convex.db.rpush key, word
-        }
+        # Specifically return the words so we can then update word counts without
+        # having to look up the words again
+        return datum.value.to_s.split(' ').reject { |s| s.to_s.strip == '' }.collect { |word|
+          word = word.to_s.strip.downcase
+          next if COMMON_WORDS_TO_SKIP.include?(word) || (word =~ WORD_CONTENTS_TO_SKIP)
+          word = word.gsub(WORD_CONTENTS_TO_STRIP, '').strip
+          next if word == ''
+          Convex.db.rpush(key, word)
+          word
+        }.compact
       end
       
       ### Topics ###
