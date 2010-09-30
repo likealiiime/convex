@@ -62,8 +62,7 @@ module Convex
         words = Convex.db.lrange(w_key, 0, Convex.db.llen(w_key))
         Convex.db.del wc_key
         update_word_counts_using_words_for_user_id(words, id)
-        minutes = (Time.now - start) / 60.0
-        info("Reset %d word counts for #%d in %.1f minutes" % [words.count, id, minutes])
+        info("Reset %d word counts for #%d in %.1f seconds" % [words.count, id, (Time.now - start)])
       end
       
       def self.update_word_counts_using_words_for_user_id(words, id)
