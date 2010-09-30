@@ -21,6 +21,7 @@ module Convex
           user_id = datum.creator_id.to_i
           engine.db.sadd(redis_key_for_user_set(user_id), datum.id)
           store_topic_using_datum(datum)
+          store_words_using_datum(datum)
           index[user_id] ||= 0
           index[user_id] += 1
           debug "[#{user_id}] SADDed #{datum}"
@@ -48,6 +49,40 @@ module Convex
         Convex.db.zscore(redis_key_for_user_similarities(ply_id), opp_id).to_f
       end
       
+      def self.datum(id)
+        JSON.parse(Convex.db.hget('lens-chronos-id_index', id))
+      end
+      
+      ### Words ###
+      def self.term_all!
+        start, ids = Time.now, all_user_ids
+        ids.each { |id| term!(id) }
+        minutes = (Time.now - start) / 60.0
+        info("Generated words for %d users in %.1f minutes" % [ids.count, minutes])
+      end
+      
+      def self.term!(my_id)
+        start, i, key = Time.now, 0, redis_key_for_user_words(my_id)
+        datum_ids = Convex.db.smembers(redis_key_for_user_set(my_id))
+        # Because the words key is a LIST and therefore can contain duplicate
+        # data, we have to delete it each time we re-generate so as not to
+        # incur reduplication
+        Convex.db.del(key)
+        datum_ids.each do |datum_id|
+          store_words_using_datum datum(datum_id)
+          i += 1
+        end
+        info("Generated %d words from %d data for #%d in %.1f seconds" % [ Convex.db.llen(key), datum_ids.count, my_id, (Time.now - start) ])
+      end
+      
+      def self.store_words_using_datum(datum)
+        return unless datum.has_id_and_creator?
+        key = redis_key_for_user_words(datum.creator_id)
+        datum.value.to_s.split(' ').reject { |s| s.to_s.strip == '' }.each { |word|
+          Convex.db.rpush key, word
+        }
+      end
+      
       ### Topics ###
       def self.theme_all!
         start = Time.now
@@ -57,7 +92,7 @@ module Convex
           theme!(user_id)
         end
         minutes = (Time.now - start) / 60.0
-        info("Generated topics for %d users in %.1f minutes" % [topics_count, ids.count, minutes])
+        info("Generated topics for %d users in %.1f minutes" % [ids.count, minutes])
       end
       
       def self.theme!(my_id)
@@ -65,9 +100,7 @@ module Convex
         i = 0
         datum_ids = Convex.db.smembers(redis_key_for_user_set(my_id))
         datum_ids.each do |datum_id|
-          json = Convex.db.hget 'lens-chronos-id_index', datum_id
-          datum = JSON.parse(json)
-          store_topic_using_datum(datum)
+          store_topic_using_datum datum(datum_id)
           i += 1
         end
         info("Generated %d topics from %d data for #%d in %.1f seconds" % [Convex.db.scard(redis_key_for_user_topics(my_id)), datum_ids.count, my_id, (Time.now - start)])

@@ -70,6 +70,14 @@ elsif ARGV.first == 'evaluate_all!'
   ARGV.shift
   Convex::Eros::Lens.evaluate_all!
 
+### Words ###
+elsif ARGV.first == 'term!'
+  ARGV.shift
+  Convex::Eros::Lens.term!(ARGV.shift)
+elsif ARGV.first == 'term_all!'
+  ARGV.shift
+  Convex::Eros::Lens.term_all!
+
 ### Topics ###
 elsif ARGV.first == 'theme!'
   ARGV.shift
@@ -77,9 +85,6 @@ elsif ARGV.first == 'theme!'
 elsif ARGV.first == 'theme_all!'
   ARGV.shift
   Convex::Eros::Lens.theme_all!
-
-elsif ARGV.first == 'test_all!'
-  Convex::Eros::Lens.test_all!
 
 ### Ranking ###
 elsif ARGV.first == 'best'
