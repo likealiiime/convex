@@ -47,6 +47,11 @@ elsif ARGV.first == 'vs'
   opp = Convex::Eros::User.new(ARGV.shift)
   puts "T = %.8f" % ply.tanimoto_against(opp)
   puts "P = %.8f" % ply.pearson_against(opp)
+elsif ARGV.first == 'group'
+  ARGV.shift
+  users = ARGV.collect { |id| Convex::Eros::User.new(id) }
+  k = 10
+  puts "K(#{k}) = %s" % Convex::Eros::User.kcluster(users, k).inspect
 elsif ARGV.first == 'test!'
   ARGV.shift
   Convex::Eros::Lens.test!(ARGV.shift)
