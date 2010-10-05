@@ -35,6 +35,10 @@ module Convex
       end
       
       ### Utility ###
+      def self.count
+        all_user_ids.count
+      end
+      
       def self.all_user_ids
         pattern = /^lens-eros-(\d+?)$/
         Convex.db.keys('lens-eros-*').collect { |key| key =~ pattern; $1 }.compact
@@ -45,7 +49,8 @@ module Convex
       end
       
       def self.all_users_hash
-        Hash[all_user_ids.zip(all_users)]
+        hash = Hash[all_user_ids.zip(all_users)]
+        return hash
       end
       
       def self.similarity_between(ply_id, opp_id)
@@ -56,6 +61,17 @@ module Convex
         JSON.parse(Convex.db.hget('lens-chronos-id_index', id))
       end
       
+      ### Indexing ###
+      def self.index_all!
+        Convex::Eros::Lens.info("Beginning re-index (theme->term->wcount->rate->evaluate)...")
+        %w(theme term wcount test).each do |step|
+          send("#{step}_all!".to_sym)
+        end
+        minutes = (Time.now - start) / 60.0
+        time = "%d hours %.1f minutes" % [minutes / 60.0, minutes % 60.0]
+        Convex::Eros::Lens.info("Re-index took #{time}")
+      end
+      
       ### Word Counts ###
       def self.wcount!(id)
         start, i, w_key, wc_key = Time.now, 0, redis_key_for_user_words(id), redis_key_for_user_word_counts(id)
@@ -63,6 +79,13 @@ module Convex
         Convex.db.del wc_key
         update_word_counts_using_words_for_user_id(words, id)
         info("Reset %d word counts for #%d in %.1f seconds" % [words.count, id, (Time.now - start)])
+      end
+      
+      def self.wcount_all!
+        ids = all_user_ids
+        start = Time.now
+        ids.each { |id| wcount! id }
+        info("Reset word counts for %d users in %.1f seconds" % [ids.count, (Time.now - start)])
       end
       
       def self.update_word_counts_using_words_for_user_id(words, id)
@@ -255,15 +278,11 @@ module Convex
         start = Time.now
         users = all_users_hash
         i = 1
-        users.each do |player|
-          debug "(#{i}/#{ids.count}) Indexing ##{player}..."
-          begin
-            users.each { |opponent| test_player_against_opponent_and_store!(player, opponent) }
-            t = (Time.now - start) / 60.0
-            debug("%.3f minutes have elapsed\n\n" % t)
-          rescue
-            warn "Could not index ##{opp_id} because: #{$!}"
-          end
+        users.each do |player_id, player|
+          info "(#{i}/#{users.count}) Indexing #{player}..."
+          users.each { |opponent_id, opponent| test_player_against_opponent_and_store!(player, opponent) }
+          t = (Time.now - start) / 60.0
+          info("%.3f minutes have elapsed" % t)
           i += 1
         end        
         minutes = (Time.now - start) / 60.0
@@ -274,6 +293,8 @@ module Convex
         rate_player_against_opponent_and_store!(player, opponent)
         player.ratings!; opponent.ratings!
         evaluate_player_against_opponent_and_store!(player, opponent)
+      rescue
+        warn "Could not test #{player} against #{opponent} because: #{$!}\n\n#{$!.backtrace.join("\n")}\n\n"
       end
       
       ### Ranking ###
