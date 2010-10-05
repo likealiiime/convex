@@ -4,10 +4,58 @@ require File.join(_here, '..', '..', 'lib', 'convex')
 require File.join(_here, 'lens')
 require 'httparty'
 require 'fileutils'
+require 'postmark'
+require 'tmail'
 
 Convex.boot!
-Convex.force_debug_logging!
 ARGV.shift
+
+def perform_mass_index!
+  Convex::Eros::Lens.info("Beginning re-index (theme->term->wcount->rate->evaluate)...")
+  %w(theme term test).each do |action|
+    perform_mass action
+  end
+  minutes = (Time.now - start) / 60.0
+  body = "In %d hours %.1f minutes" % [minutes / 60.0, minutes % 60.0]
+  
+  Convex::Eros::Lens.info("Re-index completed #{time}")
+  message               = TMail::Mail.new
+  message.from          = "general@styledon.com"
+  message.to            = %w(dev@styledon.com)
+  message.content_type  = "text/html"
+  message.tag           = "convex/eros/client"
+  message.subject       = "Re-index complete"
+  message.body          = body
+  Postmark.send_through_postmark(message)
+end
+
+def perform_mass(method)
+  message               = TMail::Mail.new
+  message.from          = "general@styledon.com"
+  message.to            = %w(dev@styledon.com)
+  message.content_type  = "text/html"
+  message.tag           = "convex/eros/client"
+  
+  name = method.to_s.split('_').first
+  start, failure = Time.now, false
+  Convex::Eros::Lens.info("Beginning #{name}...")
+  begin
+    Convex::Eros::Lens.send("#{method}_all!".to_sym)
+    message.subject = "#{name.capitalize} complete"
+  rescue
+    message.subject = "#{name.capitalize} FAILED!"
+    Convex::Eros::Lens.warn("Convex::Eros::Lens.#{method}_all! failed because: #{$!}\n\n" << $!.backtrace.join("\n"))
+    failure = "\n\n<p><strong>#{$!}</strong></p>" << "<ul>" << $!.backtrace.collect { |line| "<li>#{line}</li>" }.join("\n") << "</ul>"
+  end
+  minutes = (Time.now - start) / 60.0
+  time = "%d hours %.1f minutes" % [minutes / 60.0, minutes % 60.0]
+  body = "#{name.capitalize} of #{Convex::Eros::Lens.count} users #{failure ? 'FAILED' : 'completed'} after #{time}"
+  Convex::Eros::Lens.info(body)
+  message.body = "<p>#{body}</p>"
+  message.body << failure if failure
+  Postmark.send_through_postmark(message)
+  Convex::Eros::Lens.debug("Sent email to #{message.to.join(', ')}")
+end
 
 def puts_ordered_ids_and_numbers(set, no_data_message="There does not seem to be enough data!")
   if set.count > 0
@@ -40,7 +88,13 @@ if ARGV.first == 'count'
     puts "##{id}:\t#{Convex.db.scard(key)}"
   }
 
+### Indexing ###
+#   Done to reset or initialize data
+elsif ARGV.first == 'index_all!'
+  perform_mass_index!
+  
 ### Testing ###
+#   Done at a regular interval 
 elsif ARGV.first == 'vs'
   ARGV.shift
   ply = Convex::Eros::User.new(ARGV.shift)
@@ -56,32 +110,28 @@ elsif ARGV.first == 'test!'
   ARGV.shift
   Convex::Eros::Lens.test!(ARGV.shift)
 elsif ARGV.first == 'test_all!'
-  ARGV.shift
-  Convex::Eros::Lens.test_all!(ARGV.shift)
+  perform_mass :test
   
 ### Rating ###
 elsif ARGV.first == 'rate!'
   ARGV.shift
   Convex::Eros::Lens.rate!(ARGV.shift)
 elsif ARGV.first == 'rate_all!'
-  ARGV.shift
-  Convex::Eros::Lens.rate_all!(ARGV.shift)
+  perform_mass :rate
   
 ### Evaluation ###
 elsif ARGV.first == 'evaluate!'
   ARGV.shift
   Convex::Eros::Lens.evaluate!(ARGV.shift)
 elsif ARGV.first == 'evaluate_all!'
-  ARGV.shift
-  Convex::Eros::Lens.evaluate_all!
+  perform_mass :evaluate
 
 ### Words ###
 elsif ARGV.first == 'term!'
   ARGV.shift
   Convex::Eros::Lens.term!(ARGV.shift)
 elsif ARGV.first == 'term_all!'
-  ARGV.shift
-  Convex::Eros::Lens.term_all!
+  perform_mass :term
 
 ### Word Counts ###
 elsif ARGV.first == 'wcounts'
@@ -97,14 +147,15 @@ elsif ARGV.first == 'wcounts'
 elsif ARGV.first == 'wcount!'
   ARGV.shift
   Convex::Eros::Lens.wcount!(ARGV.shift)
-
+elsif ARGV.first == 'wcount_all!'
+  perform_mass :wcount
+  
 ### Topics ###
 elsif ARGV.first == 'theme!'
   ARGV.shift
   Convex::Eros::Lens.theme!(ARGV.shift)
 elsif ARGV.first == 'theme_all!'
-  ARGV.shift
-  Convex::Eros::Lens.theme_all!
+  perform_mass :theme
 
 ### Ranking ###
 elsif ARGV.first == 'best'
