@@ -103,7 +103,8 @@ module Convex
     
     def initialize(mode);
       raise EnvironmentNotRecognizedError.new("#{mode} is not one of: #{MODES.join(', ')}") unless MODES.include? mode.to_sym
-      @mode = mode.to_sym;
+      @mode = mode.to_sym
+      Postmark.api_key = "782667ec-e8dc-4c6d-a225-7432cc3451e4" if defined? Postmark
     end
     def code; mode == :headless ? -1 : MODES.index(mode); end
     def development?; mode == :development || mode == :forgetful; end
