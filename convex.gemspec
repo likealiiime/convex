@@ -5,18 +5,24 @@
 
 Gem::Specification.new do |s|
   s.name = %q{convex}
-  s.version = "1.1.0"
+  s.version = "1.5.0"
 
   s.required_rubygems_version = Gem::Requirement.new(">= 0") if s.respond_to? :required_rubygems_version=
   s.authors = ["Sherr\303\263d Faulks"]
-  s.date = %q{2010-09-16}
+  s.date = %q{2010-10-05}
   s.description = %q{Convex is a semantic conversation extractor. It uses the OpenCalais service to understand documents and generate a flurry of information which is stored and manipulated in novel ways by Convex and its lenses.}
   s.email = %q{dev@styledon.com}
+  s.extra_rdoc_files = [
+    "README"
+  ]
   s.files = [
     ".gitignore",
+     "README",
      "Rakefile",
      "VERSION",
      "chronosd",
+     "config.ru",
+     "convex-1.1.0.gem",
      "convex.gemspec",
      "convexd",
      "doc/Calais.graffle",
@@ -59,7 +65,9 @@ Gem::Specification.new do |s|
      "lenses/chronos/service.rb",
      "lenses/eros/client.rb",
      "lenses/eros/lens.rb",
+     "lenses/eros/user.rb",
      "lib/calais_service.rb",
+     "lib/command.rb",
      "lib/convex.rb",
      "lib/convex_service.rb",
      "lib/datum.rb",
@@ -75,7 +83,30 @@ Gem::Specification.new do |s|
      "lib/engine.rb",
      "lib/extensions.rb",
      "lib/logging.rb",
-     "lib/service_ports.rb"
+     "lib/service_ports.rb",
+     "psd/Convex.psd",
+     "web/public/fonts/Quicksand License.txt",
+     "web/public/fonts/Quicksand_Bold-webfont.eot",
+     "web/public/fonts/Quicksand_Bold-webfont.ttf",
+     "web/public/fonts/Quicksand_Bold_Oblique-webfont.eot",
+     "web/public/fonts/Quicksand_Bold_Oblique-webfont.ttf",
+     "web/public/fonts/Quicksand_Book-webfont.eot",
+     "web/public/fonts/Quicksand_Book-webfont.ttf",
+     "web/public/fonts/Quicksand_Book_Oblique-webfont.eot",
+     "web/public/fonts/Quicksand_Book_Oblique-webfont.ttf",
+     "web/public/fonts/Quicksand_Dash-webfont.eot",
+     "web/public/fonts/Quicksand_Dash-webfont.ttf",
+     "web/public/fonts/Quicksand_Light-webfont.eot",
+     "web/public/fonts/Quicksand_Light-webfont.ttf",
+     "web/public/fonts/Quicksand_Light_Oblique-webfont.eot",
+     "web/public/fonts/Quicksand_Light_Oblique-webfont.ttf",
+     "web/public/images/site/convex.png",
+     "web/public/javascripts/application.js",
+     "web/public/javascripts/mootools-1.2.5-core-yc.js",
+     "web/public/stylesheets/application.css",
+     "web/public/stylesheets/quicksand.css",
+     "web/views/index.erubis",
+     "web/web.rb"
   ]
   s.homepage = %q{http://github.com/StyledOn/convex}
   s.rdoc_options = ["--charset=UTF-8"]
