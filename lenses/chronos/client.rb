@@ -16,4 +16,5 @@ elsif ARGV.first == 'index'
 elsif ARGV.first == 'id'
   ARGV.shift
   $stdout << Convex::Chronos::Lens.id_datum_json(ARGV.shift)
+elsif ARGV.first == 'last'
 end

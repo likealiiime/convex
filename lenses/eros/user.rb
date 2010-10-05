@@ -184,7 +184,7 @@ module Convex
       end
       
       def to_s; "##{self.id}/#{self.count}"; end
-      
+      alias :inspect :to_s
     end
   end
 end

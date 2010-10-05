@@ -53,9 +53,9 @@ module Convex
       
       def self.ping
         debug "Someone is pinging the lens..."
-        pong = TRANSIENT_PERIODS.collect { |p| Convex.db.llen(redis_key_for_list(p)) } + Convex.db.zcard(redis_key_for_list(:life))
-        pong = pong[0..-2].join(' ') + ' / ' + pong.last
-        info  "Pong: #{pong}"
+        pong = TRANSIENT_PERIODS.collect { |p| Convex.db.llen(redis_key_for_list(p)) } << Convex.db.zcard(redis_key_for_list(:life))
+        pong = pong[0..-2].join(' ') + ' / ' + pong.last.to_s
+        info "Pong: #{pong}"
         return pong
       end
       
