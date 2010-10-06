@@ -19,7 +19,7 @@ def perform_mass_index!
   minutes = (Time.now - start) / 60.0
   body = "In %d hours %.1f minutes" % [minutes / 60.0, minutes % 60.0]
   
-  Convex::Eros::Lens.info("Re-index completed #{time}")
+  Convex::Eros::Lens.info("Re-index completed #{time.downcase}")
   message               = TMail::Mail.new
   message.from          = "general@styledon.com"
   message.to            = %w(dev@styledon.com)
