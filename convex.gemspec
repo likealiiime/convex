@@ -5,11 +5,11 @@
 
 Gem::Specification.new do |s|
   s.name = %q{convex}
-  s.version = "1.5.0"
+  s.version = "1.6.1"
 
   s.required_rubygems_version = Gem::Requirement.new(">= 0") if s.respond_to? :required_rubygems_version=
   s.authors = ["Sherr\303\263d Faulks"]
-  s.date = %q{2010-10-05}
+  s.date = %q{2010-10-06}
   s.description = %q{Convex is a semantic conversation extractor. It uses the OpenCalais service to understand documents and generate a flurry of information which is stored and manipulated in novel ways by Convex and its lenses.}
   s.email = %q{dev@styledon.com}
   s.extra_rdoc_files = [
@@ -120,9 +120,45 @@ Gem::Specification.new do |s|
     s.specification_version = 3
 
     if Gem::Version.new(Gem::VERSION) >= Gem::Version.new('1.2.0') then
+      s.add_runtime_dependency(%q<ruby-debug>, [">= 0"])
+      s.add_runtime_dependency(%q<redis>, [">= 0"])
+      s.add_runtime_dependency(%q<nokogiri>, [">= 0"])
+      s.add_runtime_dependency(%q<eventmachine>, [">= 0"])
+      s.add_runtime_dependency(%q<SystemTimer>, [">= 0"])
+      s.add_runtime_dependency(%q<json>, [">= 0"])
+      s.add_runtime_dependency(%q<httparty>, [">= 0"])
+      s.add_runtime_dependency(%q<postmark>, [">= 0"])
+      s.add_runtime_dependency(%q<tmail>, [">= 0"])
+      s.add_runtime_dependency(%q<sinatra>, [">= 0"])
+      s.add_runtime_dependency(%q<erubis>, [">= 0"])
+      s.add_runtime_dependency(%q<sinatra-reloader>, [">= 0"])
     else
+      s.add_dependency(%q<ruby-debug>, [">= 0"])
+      s.add_dependency(%q<redis>, [">= 0"])
+      s.add_dependency(%q<nokogiri>, [">= 0"])
+      s.add_dependency(%q<eventmachine>, [">= 0"])
+      s.add_dependency(%q<SystemTimer>, [">= 0"])
+      s.add_dependency(%q<json>, [">= 0"])
+      s.add_dependency(%q<httparty>, [">= 0"])
+      s.add_dependency(%q<postmark>, [">= 0"])
+      s.add_dependency(%q<tmail>, [">= 0"])
+      s.add_dependency(%q<sinatra>, [">= 0"])
+      s.add_dependency(%q<erubis>, [">= 0"])
+      s.add_dependency(%q<sinatra-reloader>, [">= 0"])
     end
   else
+    s.add_dependency(%q<ruby-debug>, [">= 0"])
+    s.add_dependency(%q<redis>, [">= 0"])
+    s.add_dependency(%q<nokogiri>, [">= 0"])
+    s.add_dependency(%q<eventmachine>, [">= 0"])
+    s.add_dependency(%q<SystemTimer>, [">= 0"])
+    s.add_dependency(%q<json>, [">= 0"])
+    s.add_dependency(%q<httparty>, [">= 0"])
+    s.add_dependency(%q<postmark>, [">= 0"])
+    s.add_dependency(%q<tmail>, [">= 0"])
+    s.add_dependency(%q<sinatra>, [">= 0"])
+    s.add_dependency(%q<erubis>, [">= 0"])
+    s.add_dependency(%q<sinatra-reloader>, [">= 0"])
   end
 end
 
