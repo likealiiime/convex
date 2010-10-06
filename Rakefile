@@ -8,10 +8,14 @@ begin
     gemspec.homepage = "http://github.com/StyledOn/convex"
     gemspec.authors = ["Sherród Faulks"]
     gemspec.require_paths = ["lib"]
-    #gemspec.add_dependency "", # version
+    %w(ruby-debug redis nokogiri eventmachine SystemTimer json httparty postmark tmail sinatra erubis sinatra-reloader).each do |dependency|
+      gemspec.add_dependency dependency
+    end
   end
 rescue LoadError
-  puts "Jeweler not available. Install it with: gem install jeweler"
+  puts "Jeweler not available. Install it with: sudo gem install jeweler"
 end
 
+# These are shim tasks because AppCloud tries to run them despite this being
+# a Rack/Sinatra app
 namespace :db do; task :migrate do; end; end
