@@ -22,7 +22,6 @@ Gem::Specification.new do |s|
      "VERSION",
      "chronosd",
      "config.ru",
-     "convex-1.1.0.gem",
      "convex.gemspec",
      "convexd",
      "lenses/chronos/client.rb",

@@ -3,3 +3,6 @@ Convex - CONVersation EXtractor
 Convex is a semantic conversation extractor. It uses the OpenCalais service to
 understand documents and generate a flurry of information which is stored and
 manipulated in novel ways by Convex and its lenses.
+
+Convex is registered under the Creative Commons Attribution-NonCommercial-NoDerivs 3.0 Unported License:
+http://creativecommons.org/licenses/by-nc-nd/3.0/
