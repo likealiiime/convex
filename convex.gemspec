@@ -9,14 +9,16 @@ Gem::Specification.new do |s|
 
   s.required_rubygems_version = Gem::Requirement.new(">= 0") if s.respond_to? :required_rubygems_version=
   s.authors = ["Sherr\303\263d Faulks"]
-  s.date = %q{2010-10-06}
+  s.date = %q{2010-10-07}
   s.description = %q{Convex is a semantic conversation extractor. It uses the OpenCalais service to understand documents and generate a flurry of information which is stored and manipulated in novel ways by Convex and its lenses.}
   s.email = %q{dev@styledon.com}
   s.extra_rdoc_files = [
-    "README"
+    "LICENSE",
+     "README"
   ]
   s.files = [
     ".gitignore",
+     "LICENSE",
      "README",
      "Rakefile",
      "VERSION",
