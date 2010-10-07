@@ -21,7 +21,7 @@ def perform_mass_index!
   
   Convex::Eros::Lens.info("Re-index completed #{time.downcase}")
   message               = TMail::Mail.new
-  message.from          = "general@styledon.com"
+  message.from          = %w(general@styledon.com)
   message.to            = %w(dev@styledon.com)
   message.content_type  = "text/html"
   message.tag           = "convex/eros/client"
@@ -32,7 +32,7 @@ end
 
 def perform_mass(method)
   message               = TMail::Mail.new
-  message.from          = "general@styledon.com"
+  message.from          = %w(general@styledon.com)
   message.to            = %w(dev@styledon.com)
   message.content_type  = "text/html"
   message.tag           = "convex/eros/client"
