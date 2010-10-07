@@ -47,10 +47,10 @@ class Hash
 end
 
 class Array
-  def sum; self.reduce(:+); end
+  def sumf; self.reduce(:+); end
   def **(b)
     raise ArgumentError.new("Cannot dot-multiply arrays of differing lengths") if self.length != b.length
-    (0...self.length).to_a.collect { |i| self[i] * b[i] }.sum
+    (0...self.length).to_a.collect { |i| self[i] * b[i] }.sumf
   end
   def magnitude
     Math.sqrt(self ** self)

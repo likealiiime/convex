@@ -51,11 +51,11 @@ module Convex
       end
       
       def self.pearson(v1, v2, should_subtract=false)
-        sum1, sum2 = v1.sum, v2.sum
-        sumsqr1, sumsqr2 = v1.collect { |x| x ** 2 }.sum, v2.collect { |x| x ** 2 }.sum
+        sum1, sum2 = v1.sumf, v2.sumf
+        sumsqr1, sumsqr2 = v1.collect { |x| x ** 2 }.sumf, v2.collect { |x| x ** 2 }.sumf
         sump = []
         v1.each_index { |i| sump << v1[i] * v2[i] }
-        sump = sump.sum
+        sump = sump.sumf
         n = v1.count.to_f
         num = sump - (sum1 * sum2 / n)
         den = Math.sqrt(
@@ -73,11 +73,11 @@ module Convex
         user_ids = Convex::Eros::Lens.all_user_ids.collect
         n = user_ids.count.to_f
         
-        my_sum = user_ids.collect { |id| self.ratings[id].to_f }.sum
-        opp_sum = user_ids.collect { |id| opp.ratings[id].to_f }.sum
-        my_sumsqr = user_ids.collect { |id| self.ratings[id].to_f ** 2 }.sum
-        opp_sumsqr = user_ids.collect { |id| opp.ratings[id].to_f ** 2 }.sum
-        our_sumproducts = user_ids.collect { |id| self.ratings[id].to_f * opp.ratings[id].to_f }.sum
+        my_sum = user_ids.collect { |id| self.ratings[id].to_f }.sumf
+        opp_sum = user_ids.collect { |id| opp.ratings[id].to_f }.sumf
+        my_sumsqr = user_ids.collect { |id| self.ratings[id].to_f ** 2 }.sumf
+        opp_sumsqr = user_ids.collect { |id| opp.ratings[id].to_f ** 2 }.sumf
+        our_sumproducts = user_ids.collect { |id| self.ratings[id].to_f * opp.ratings[id].to_f }.sumf
         
         a = our_sumproducts - (my_sum * opp_sum / n)
         b = Math.sqrt(
