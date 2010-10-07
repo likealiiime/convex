@@ -46,7 +46,7 @@ class Hash
   end
 end
 
-Array.class_eval <<END
+class Array
   def sum; self.reduce(:+); end
   def **(b)
     raise ArgumentError.new("Cannot dot-multiply arrays of differing lengths") if self.length != b.length
@@ -58,4 +58,13 @@ Array.class_eval <<END
   def square_magnitude
     self ** self
   end
-END
+end
+
+unless Object.new.public_methods.include?('try') || Object.new.public_methods.include?(:try)
+  class Object
+    def try(method, *params)
+      self.send(method, params) rescue nil
+    end
+  end
+end
+  
