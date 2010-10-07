@@ -63,7 +63,7 @@ end
 unless Object.new.public_methods.include?('try') || Object.new.public_methods.include?(:try)
   class Object
     def try(method, *params)
-      self.send(method, params) rescue nil
+      (params == [] ? self.send(method) : self.send(method, params)) rescue nil
     end
   end
 end
