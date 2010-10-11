@@ -28,7 +28,11 @@ def perform_mass_index!
   message.tag           = "convex/eros/client"
   message.subject       = "Re-index complete"
   message.body          = body
-  Postmark.send_through_postmark(message)
+  begin
+    Postmark.send_through_postmark(message)
+  rescue
+    Convex::Eros::Lens.warn("Failed to send email: #{$!}")
+  end
 end
 
 def perform_mass(method)
@@ -55,8 +59,12 @@ def perform_mass(method)
   Convex::Eros::Lens.info(body)
   message.body = "<p>#{body}</p>"
   message.body << failure if failure
-  Postmark.send_through_postmark(message)
-  Convex::Eros::Lens.debug("Sent email to #{message.to.join(', ')}")
+  begin
+    Postmark.send_through_postmark(message)
+    Convex::Eros::Lens.debug("Sent email to #{message.to.join(', ')}")
+  rescue
+    Convex::Eros::Lens.warn("Failed to send email: #{$!}")
+  end
 end
 
 def puts_ordered_ids_and_numbers(set, no_data_message="There does not seem to be enough data!")
