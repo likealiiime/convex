@@ -60,6 +60,7 @@ class Array
   end
 end
 
+=begin
 unless Object.new.public_methods.include?('try') || Object.new.public_methods.include?(:try)
   class Object
     def try(method, *params)
@@ -67,4 +68,4 @@ unless Object.new.public_methods.include?('try') || Object.new.public_methods.in
     end
   end
 end
-  
+=end
