@@ -13,8 +13,8 @@ ARGV.shift
 
 def perform_mass_index!
   start = Time.now
-  Convex::Eros::Lens.info("Beginning re-index (theme->term->wcount->rate->evaluate)...")
-  %w(theme term test).each do |action|
+  Convex::Eros::Lens.info("Beginning re-index (theme->term+wcount->rate->evaluate)...")
+  %w(theme term rate evaluate).each do |action|
     perform_mass action
   end
   minutes = (Time.now - start) / 60.0
