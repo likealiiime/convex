@@ -190,7 +190,7 @@ module Convex
         users = {}
         i = 1
         ids.each do |player_id|
-          debug "(#{i}/#{ids.count}) Rating ##{player_id}..."
+          info "(#{i}/#{ids.count}) Rating ##{player_id}..."
           begin
             player = users[player_id] ||= Convex::Eros::User.new(player_id)
             ids.each do |opponent_id|
@@ -198,7 +198,7 @@ module Convex
               rate_player_against_opponent_and_store!(player, opponent)
             end
             t = (Time.now - start) / 60.0
-            debug("%.3f minutes have elapsed\n\n" % t)
+            info("%.3f minutes have elapsed\n\n" % t)
           rescue
             warn "Could not rate ##{opp_id} because: #{$!}"
           end
@@ -238,7 +238,7 @@ module Convex
         users = {}
         i = 1
         ids.each do |player_id|
-          debug "(#{i}/#{ids.count}) Evaluating ##{player_id}..."
+          info "(#{i}/#{ids.count}) Evaluating ##{player_id}..."
           begin
             player = users[player_id] ||= Convex::Eros::User.new(player_id)
             ids.each do |opponent_id|
@@ -246,7 +246,7 @@ module Convex
               evaluate_player_against_opponent_and_store!(player, opponent)
             end
             t = (Time.now - start) / 60.0
-            debug("%.3f minutes have elapsed\n\n" % t)
+            info("%.3f minutes have elapsed\n\n" % t)
           rescue
             warn "Could not evaluate ##{opp_id} because: #{$!}"
           end
