@@ -4,7 +4,6 @@ require File.join(_here, '..', '..', 'lib', 'convex')
 require File.join(_here, 'lens')
 require 'httparty'
 require 'fileutils'
-require 'active_support'
 require 'postmark'
 require 'tmail'
 
