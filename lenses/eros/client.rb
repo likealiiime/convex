@@ -190,7 +190,7 @@ elsif ARGV.first == 'prefspace'
   n, i, extreme_n = 100, 0, 5
   x_id,x, y_id,y = ARGV.shift,[], ARGV.shift,[]
   max_x, max_y = 0, 0
-  best_ids = (lens.best_n_ids_and_scores_for_id(n, x_id, { :method => :similarities, :integerize_ids => true }) | lens.best_n_ids_and_scores_for_id(n, y_id, { :method => :similarities, :integerize_ids => true }))
+  best_ids = (lens.best_n_ids_and_scores_for_id(n, x_id, { :method => :ratings, :integerize_ids => true }) | lens.best_n_ids_and_scores_for_id(n, y_id, { :method => :similarities, :integerize_ids => true }))
   best_ids = best_ids[0...n].sort { |a,b| a.last <=> b.last }.collect(&:first)
   labels = ['c,63A7FF,0,-1,10']
   
