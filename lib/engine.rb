@@ -7,7 +7,6 @@ module Convex
     attr_accessor :lenses
 
     def initialize
-      @code = Convex.next_engine_code
       info "Hello, world!"
       @db = Redis.new
       debug "Connected to Redis"
@@ -15,6 +14,7 @@ module Convex
       debug "SELECTed #{Convex.env.mode} database, code #{Convex.env.code}"
       @calais = Convex::CalaisService.new
       @birthdate = Time.now
+      @code = birthdate.strftime("%m-%d-%Y at %H-%M-%S")
       reset!
     end
     
