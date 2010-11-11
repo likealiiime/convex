@@ -52,6 +52,7 @@ Gem::Specification.new do |s|
      "lib/extensions.rb",
      "lib/logging.rb",
      "lib/service_ports.rb",
+     "pkg/convex-1.7.0.gem",
      "web/public/fonts/Quicksand License.txt",
      "web/public/fonts/Quicksand_Bold-webfont.eot",
      "web/public/fonts/Quicksand_Bold-webfont.ttf",
