@@ -3,8 +3,8 @@ module Convex
     @@log = nil
     @@log_should_debug = false
     
-    def self.open_log_with_name(name)
-      @@log ||= File.open(File.join(Convex::LOG_PATH, "#{name}.log"), 'a')
+    def self.open_log_at(path)
+      @@log ||= File.open(path, 'a')
       @@log.puts "\n\n"
     end
     
