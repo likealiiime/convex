@@ -6,10 +6,11 @@ require 'redis'
 require 'nokogiri'
 require 'eventmachine'
 require 'system_timer'
+require 'fileutils'
 require 'json/ext' # This is the C version; much faster!
 
 # Convex libraries
-%w(logging extensions calais_service engine datum_type datum service_ports command).each do |lib|
+%w(environment logging extensions calais_service engine datum_type datum service_ports command).each do |lib|
   require File.join(File.dirname(__FILE__), lib)
 end
 
@@ -21,9 +22,6 @@ module Convex
   @@next_engine_code = nil
   
   ROOT_PATH = File.expand_path(File.join(File.dirname(__FILE__), '..'))
-  %w(lib log tmp pids lenses).each do |path|
-    Convex.const_set("#{path.upcase}_PATH", File.join(ROOT_PATH, path))
-  end
   
   def self.lenses; @@lenses; end
   def self.env; @@env; end
@@ -36,7 +34,6 @@ module Convex
     
     raise Environment::CannotBootIntoHeadlessModeError.new("Cannot Convex.boot! into headless mode. Call Convex.headless! instead.") if mode == :headless
     @@env = Convex::Environment.new(mode)
-    Convex::Logging.open_log_with_name(env.mode)
     @@lenses = []
     
     start = Time.now
@@ -90,26 +87,6 @@ module Convex
   
   def self.new_redis_connection
     Redis.new(:host => Convex::Service::ADDRESS, :port => Convex::RedisService::PORT, :timeout => 0)
-  end
-end
-
-module Convex
-  class Environment
-    class EnvironmentNotRecognizedError < ArgumentError; end
-    class CannotBootIntoHeadlessModeError < RuntimeError; end
-    
-    MODES = [:development, :forgetful, :production, :headless]
-    attr_reader :mode
-    
-    def initialize(mode);
-      raise EnvironmentNotRecognizedError.new("#{mode} is not one of: #{MODES.join(', ')}") unless MODES.include? mode.to_sym
-      @mode = mode.to_sym
-      Postmark.api_key = "782667ec-e8dc-4c6d-a225-7432cc3451e4" if defined? Postmark
-    end
-    def code; mode == :headless ? -1 : MODES.index(mode); end
-    def development?; mode == :development || mode == :forgetful; end
-    def forgetful?; mode == :forgetful; end
-    def to_s; mode.to_s; end
   end
 end
 
