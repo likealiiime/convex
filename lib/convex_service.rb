@@ -1,6 +1,5 @@
-require File.join(File.dirname(__FILE__), 'convex')
-require File.join(Convex::LENSES_PATH, 'chronos', 'lens')
-require File.join(Convex::LENSES_PATH, 'eros', 'lens')
+require File.join(File.dirname(__FILE__), '..', 'lenses', 'chronos', 'lens')
+require File.join(File.dirname(__FILE__), '..', 'lenses', 'eros', 'lens')
 
 module Convex
   module ConvexFocusingService
@@ -31,7 +30,7 @@ end
 
 EventMachine::run do
   Convex.boot!
-  Convex << [Convex::Chronos::Lens, Convex::Eros::Lens]
+  Convex::Engine << [Convex::Chronos::Lens, Convex::Eros::Lens]
   Convex::ConvexFocusingService.info "Now listening for incoming connections on #{Convex::Service::ADDRESS}:#{Convex::ConvexFocusingService::PORT}"
   EventMachine::start_server Convex::Service::ADDRESS, Convex::ConvexFocusingService::PORT, Convex::ConvexFocusingService
 end

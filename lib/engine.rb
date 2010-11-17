@@ -4,8 +4,9 @@ module Convex
     
     attr_reader   :db, :trash, :response, :response_body, :context, :overrides, :code, :birthdate
     attr_reader   :subject_uri_index, :calais_ref_uri_index, :datum_type_index
-    attr_accessor :lenses
-
+    @@lenses = []
+    def self.lenses; @@lenses; end
+    
     def initialize
       info "Hello, world!"
       @db = Redis.new
@@ -16,6 +17,12 @@ module Convex
       @birthdate = Time.now
       @code = birthdate.strftime("%m-%d-%Y at %H-%M-%S")
       reset!
+    end
+    
+    def self.<<(*lenses)
+      lenses.flatten! if Array === lenses.first
+      @@lenses |= lenses
+      lenses.each { |l| Convex.info "Accepted #{l.name}" }
     end
     
     def reset!
@@ -75,7 +82,7 @@ module Convex
     ensure
       context.reject! { |d| d.class != Convex::Datum }
       info "Sending to Lenses..."
-      Convex.lenses.each { |lens| lens.focus_using_data!(context, self) }
+      Convex::Engine.lenses.each { |lens| lens.focus_using_data!(context, self) }
       return context
     end
     
