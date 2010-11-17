@@ -1,12 +1,11 @@
 #!/usr/bin/env ruby
 require 'rubygems'
 require 'daemons'
+require 'convex'
 
 Daemons.run(File.join(File.dirname(__FILE__), 'lib', 'convex_service.rb'), {
   :app_name => 'convexd',
-  :dir_mode => :normal,
-  :dir => 'pids',
   :multiple => false,
   :backtrace => true,
   :log_output => true
-})
+}.merge(Convex::Environment.daemons_dir_hash_for_argv))

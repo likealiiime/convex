@@ -1,4 +1,5 @@
-require File.join(File.dirname(__FILE__), '..', '..', 'lib', 'convex') if not defined? Convex
+require 'rubygems'
+require 'convex'
 require File.join(File.dirname(__FILE__), 'lens') if not defined? Convex::Chronos::Lens
 require File.join(Convex::LIB_PATH, 'em-websocket', 'em-websocket')
 

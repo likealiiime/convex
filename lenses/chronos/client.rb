@@ -1,10 +1,10 @@
 #!/usr/bin/env ruby
 
-require File.join(File.dirname(__FILE__), '..', '..', 'lib', 'convex')
+require 'rubygems'
+require 'convex'
 require File.join(File.dirname(__FILE__), 'lens')
 
 Convex.boot!
-ARGV.shift
 
 if ARGV.first == 'ping'
   Convex::Chronos::Lens.ping
