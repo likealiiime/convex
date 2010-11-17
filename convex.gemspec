@@ -9,7 +9,7 @@ Gem::Specification.new do |s|
 
   s.required_rubygems_version = Gem::Requirement.new(">= 0") if s.respond_to? :required_rubygems_version=
   s.authors = ["Sherr\303\263d Faulks"]
-  s.date = %q{2010-11-11}
+  s.date = %q{2010-11-12}
   s.description = %q{Convex is a semantic conversation extractor. It uses the OpenCalais service to understand documents and generate a flurry of information which is stored and manipulated in novel ways by Convex and its lenses.}
   s.email = %q{dev@styledon.com}
   s.extra_rdoc_files = [
@@ -76,7 +76,6 @@ Gem::Specification.new do |s|
      "web/views/index.erubis",
      "web/web.rb"
   ]
-  s.homepage = %q{http://github.com/StyledOn/convex}
   s.rdoc_options = ["--charset=UTF-8"]
   s.require_paths = ["lib"]
   s.rubygems_version = %q{1.3.7}
