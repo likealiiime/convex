@@ -8,7 +8,8 @@ require 'postmark'
 require 'tmail'
 
 Convex.boot!
-ARGV.shift
+#ARGV.shift
+Postmark.api_key = "782667ec-e8dc-4c6d-a225-7432cc3451e4" if defined? Postmark
 
 def perform_mass_index!
   start = Time.now

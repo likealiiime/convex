@@ -8,7 +8,7 @@ require 'postmark'
 require 'tmail'
 
 Convex.boot!
-ARGV.shift
+#ARGV.shift
 
 command = ARGV.shift.to_s.downcase.strip
 case command
