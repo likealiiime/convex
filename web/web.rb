@@ -26,7 +26,7 @@ module Convex
       end
     end
     
-    get '/' do
+    get '/convex' do
       @services = [
         {
           :name => :Convex,
