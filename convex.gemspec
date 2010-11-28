@@ -5,13 +5,14 @@
 
 Gem::Specification.new do |s|
   s.name = %q{convex}
-  s.version = "1.7.0.rc1"
+  s.version = "1.7.0.rc2"
 
   s.required_rubygems_version = Gem::Requirement.new("> 1.3.1") if s.respond_to? :required_rubygems_version=
   s.authors = ["Sherr\303\263d Faulks"]
   s.date = %q{2010-11-28}
   s.description = %q{Convex is a semantic conversation extractor. It uses the OpenCalais service to understand documents and generate a flurry of information which is stored and manipulated in novel ways by Convex and its lenses.}
   s.email = %q{dev@styledon.com}
+  s.executables = ["chronosd", "convexd"]
   s.extra_rdoc_files = [
     "LICENSE",
      "README"
@@ -22,10 +23,10 @@ Gem::Specification.new do |s|
      "README",
      "Rakefile",
      "VERSION",
-     "chronosd",
+     "bin/chronosd",
+     "bin/convexd",
      "config.ru",
      "convex.gemspec",
-     "convexd",
      "lenses/chronos/client.rb",
      "lenses/chronos/lens.rb",
      "lenses/chronos/service.rb",
@@ -53,6 +54,7 @@ Gem::Specification.new do |s|
      "lib/logging.rb",
      "lib/service_ports.rb",
      "lib/version.rb",
+     "pkg/convex-1.7.0.rc2.gem",
      "web/public/fonts/Quicksand License.txt",
      "web/public/fonts/Quicksand_Bold-webfont.eot",
      "web/public/fonts/Quicksand_Bold-webfont.ttf",
