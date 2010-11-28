@@ -2,8 +2,8 @@
 require 'rubygems'
 require 'daemons'
 
-here, mode = File.dirname(__FILE__), ARGV[2] || :development
-require mode == 'production' ? 'convex' : File.join(here, '..', 'lib', 'convex')
+here, mode = File.dirname(__FILE__), (ARGV[2] || :development).to_sym
+require mode == :production ? 'convex' : File.join(here, '..', 'lib', 'convex')
 
 Daemons.run(File.join(Convex::LENSES_PATH, 'chronos', 'service.rb'), {
   :app_name => 'chronosd',

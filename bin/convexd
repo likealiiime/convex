@@ -2,8 +2,8 @@
 require 'rubygems'
 require 'daemons'
 
-lib, mode = File.join(File.dirname(__FILE__), '..', 'lib'), ARGV[2] || :development
-require mode == 'production' ? 'convex' : File.join(lib, 'convex')
+lib, mode = File.join(File.dirname(__FILE__), '..', 'lib'), (ARGV[2] || :development).to_sym
+require mode == :production ? 'convex' : File.join(lib, 'convex')
 
 Daemons.run(File.join(lib, 'convex_service.rb'), {
   :app_name => 'convexd',
