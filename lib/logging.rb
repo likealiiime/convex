@@ -4,6 +4,7 @@ module Convex
     @@log_should_debug = false
     
     def self.open_log_at(path)
+      FileUtils.mkdir_p File.dirname(File.expand_path(path))
       @@log ||= path == NilEcho ? NilEcho : File.open(path, 'a')
       @@log.puts "\n\n"
     end
