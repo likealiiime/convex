@@ -10,7 +10,7 @@ require 'fileutils'
 require 'json/ext' # This is the C version; much faster!
 
 # Convex libraries
-%w(extensions environment logging calais_service engine datum_type datum service_ports command).each do |lib|
+%w(version extensions environment logging calais_service engine datum_type datum service_ports command).each do |lib|
   require File.join(File.dirname(__FILE__), lib)
 end
 

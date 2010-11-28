@@ -1,6 +1,9 @@
 begin
   require 'jeweler'
+  require './lib/version.rb'
+  
   Jeweler::Tasks.new do |gemspec|
+    gemspec.version = Convex::Version::STRING
     gemspec.name = "convex"
     gemspec.summary = "CONVersation EXtractor"
     gemspec.description = "Convex is a semantic conversation extractor. It uses the OpenCalais service to understand documents and generate a flurry of information which is stored and manipulated in novel ways by Convex and its lenses."
