@@ -12,16 +12,15 @@ module Convex
       
       # Set up paths
       local_paths = if production?
-        Convex.const_set('LOG_PATH',  Convex::Environment.log_dir_for_mode(mode))
+        Convex.const_set('LOG_PATH',  Convex::Environment.log_dir_for_mode(mode).freeze)
         FileUtils.mkdir_p Convex.const_set('TMP_PATH',  '/tmp/convex'.freeze)
-        Convex.const_set('PIDS_PATH', '/var/run'.freeze)
+        FileUtils.mkdir_p Convex.const_set('PIDS_PATH', File.expand_path('~/.convex/run').freeze)
         []
       elsif headless?
-        Convex.const_set('LOG_PATH', Convex::Environment.log_dir_for_mode(mode))
-        Convex.const_set('TMP_PATH', '/dev/null'.freeze)
-        ['pids']
+        Convex.const_set('LOG_PATH', Convex::Environment.log_dir_for_mode(mode).freeze)
+        %w(tmp pid)
       else
-        %w(log tmp pids)
+        %w(log tmp pid)
       end
       
       local_paths.each do |path|
@@ -29,27 +28,25 @@ module Convex
         FileUtils.mkdir_p Convex.const_get("#{path.upcase}_PATH")
       end
       # Set up logging
-      Convex::Logging.open_log_at headless? ? NilEcho : File.join(Convex::LOG_PATH, "#{mode}.log")
+      Convex::Logging.open_log_at File.join(Convex::LOG_PATH, "#{mode}.log")
     end
     
     def self.log_dir_for_mode(mode)
       mode ||= :forgetful
       case mode.to_sym
-      when :production
-        return '/var/log'
-      when :headless
-        return '/dev/null'
+      when :production, :headless
+        return File.expand_path('~/.convex/log')
       else
         return 'log'
       end
     end
     
+    # Shortcut for the method beneath it using ARGV
     def self.daemons_dir_hash_for_argv
       daemons_dir_hash_for_mode ARGV.first
     end
     
-    def self.daemons_dir_hash_for_mode(mode)
-      mode ||= :forgetful
+    def self.daemons_dir_hash_for_mode(mode = :forgetful)
       if mode.to_sym == :production || mode.to_sym == :headless
         return { :dir_mode => :normal, :dir => log_dir_for_mode(mode) }
       else
