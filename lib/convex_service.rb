@@ -1,5 +1,5 @@
-require File.join(File.dirname(__FILE__), '..', 'lenses', 'chronos', 'lens')
-require File.join(File.dirname(__FILE__), '..', 'lenses', 'eros', 'lens')
+require File.join(Convex::LENSES_PATH, 'chronos', 'lens')
+require File.join(Convex::LENSES_PATH, 'eros', 'lens')
 
 module Convex
   module ConvexFocusingService
