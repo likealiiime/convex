@@ -5,11 +5,11 @@
 
 Gem::Specification.new do |s|
   s.name = %q{convex}
-  s.version = "1.7.0"
+  s.version = "1.7.0.rc1"
 
-  s.required_rubygems_version = Gem::Requirement.new(">= 0") if s.respond_to? :required_rubygems_version=
+  s.required_rubygems_version = Gem::Requirement.new("> 1.3.1") if s.respond_to? :required_rubygems_version=
   s.authors = ["Sherr\303\263d Faulks"]
-  s.date = %q{2010-11-12}
+  s.date = %q{2010-11-28}
   s.description = %q{Convex is a semantic conversation extractor. It uses the OpenCalais service to understand documents and generate a flurry of information which is stored and manipulated in novel ways by Convex and its lenses.}
   s.email = %q{dev@styledon.com}
   s.extra_rdoc_files = [
@@ -52,7 +52,7 @@ Gem::Specification.new do |s|
      "lib/extensions.rb",
      "lib/logging.rb",
      "lib/service_ports.rb",
-     "pkg/convex-1.7.0.gem",
+     "lib/version.rb",
      "web/public/fonts/Quicksand License.txt",
      "web/public/fonts/Quicksand_Bold-webfont.eot",
      "web/public/fonts/Quicksand_Bold-webfont.ttf",
