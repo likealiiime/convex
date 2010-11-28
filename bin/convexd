@@ -1,0 +1,15 @@
+#!/usr/bin/env ruby
+require 'rubygems'
+require 'daemons'
+
+lib, mode = File.join(File.dirname(__FILE__), '..', 'lib'), ARGV[2] || :development
+require mode == 'production' ? 'convex' : File.join(lib, 'convex')
+
+Daemons.run(File.join(lib, 'convex_service.rb'), {
+  :app_name => 'convexd',
+  :multiple => false,
+  :backtrace => true,
+  :log_output => true,
+  :dir_mode => :normal,
+  :dir => Convex::Environment::log_dir_for_mode(mode)
+})

@@ -1,0 +1,15 @@
+#!/usr/bin/env ruby
+require 'rubygems'
+require 'daemons'
+
+here, mode = File.dirname(__FILE__), ARGV[2] || :development
+require mode == 'production' ? 'convex' : File.join(here, '..', 'lib', 'convex')
+
+Daemons.run(File.join(Convex::LENSES_PATH, 'chronos', 'service.rb'), {
+  :app_name => 'chronosd',
+  :dir_mode => :normal,
+  :dir => Convex::Environment::log_dir_for_mode(mode),
+  :multiple => false,
+  :backtrace => true,
+  :log_output => true
+})
