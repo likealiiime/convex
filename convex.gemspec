@@ -5,7 +5,7 @@
 
 Gem::Specification.new do |s|
   s.name = %q{convex}
-  s.version = "1.7.0.rc2"
+  s.version = "1.7.0.rc3"
 
   s.required_rubygems_version = Gem::Requirement.new("> 1.3.1") if s.respond_to? :required_rubygems_version=
   s.authors = ["Sherr\303\263d Faulks"]
@@ -54,7 +54,7 @@ Gem::Specification.new do |s|
      "lib/logging.rb",
      "lib/service_ports.rb",
      "lib/version.rb",
-     "pkg/convex-1.7.0.rc2.gem",
+     "pkg/convex-1.7.0.rc3.gem",
      "web/public/fonts/Quicksand License.txt",
      "web/public/fonts/Quicksand_Bold-webfont.eot",
      "web/public/fonts/Quicksand_Bold-webfont.ttf",
