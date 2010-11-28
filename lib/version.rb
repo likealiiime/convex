@@ -3,7 +3,7 @@ module Convex
     MAJOR = 1
     MINOR = 7
     PATCH = 0
-    BUILD = 'rc1'
+    BUILD = 'rc2'
 
     STRING = [MAJOR, MINOR, PATCH, BUILD].compact.join('.')
   end
