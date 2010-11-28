@@ -82,8 +82,8 @@ module Convex
     Convex.db.get('_lachesis').to_i
   end
   
-  def self.new_redis_connection
-    Redis.new(:host => Convex::Service::ADDRESS, :port => Convex::RedisService::PORT, :timeout => 0)
+  def self.new_redis_connection(timeout=0)
+    Redis.new(:host => Convex::Service::ADDRESS, :port => Convex::RedisService::PORT, :timeout => timeout)
   end
 end
 
