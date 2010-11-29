@@ -38,7 +38,7 @@ module Convex
     @@lenses = []
   
     start = Time.now
-    Convex.info "Starting Convex in #{env.to_s.upcase} mode..."
+    Convex.info "Starting Convex #{Convex.version} in #{env.to_s.upcase} mode..."
     @@db = new_redis_connection
     debug "Connected to Redis"
     @@db.select env.code
@@ -52,7 +52,7 @@ module Convex
     debug "Booting..."
     Convex::DatumType.load!
     @@booted = true
-    Convex.info("Started Convex in %.3f seconds" % (Time.now - start))
+    Convex.info("Started Convex #{Convex.version} in %.3f seconds" % (Time.now - start))
     
     ARGV.shift
   end
@@ -60,12 +60,12 @@ module Convex
   def self.headless!
     return if booted?
     start = Time.now
-    Convex.info "Starting Convex in HEADLESS mode..."
+    Convex.info "Starting Convex #{Convex.version} in HEADLESS mode..."
     @@env = Convex::Environment.new(:headless)
     debug "Booting..."
     Convex::DatumType.load!
     @@booted = true
-    Convex.info("Started Convex in %.3f seconds" % (Time.now - start))
+    Convex.info("Started Convex #{Convex.version} in %.3f seconds" % (Time.now - start))
   end
   
   def self.next_engine_code
@@ -85,6 +85,8 @@ module Convex
   def self.new_redis_connection(timeout=0)
     Redis.new(:host => Convex::Service::ADDRESS, :port => Convex::RedisService::PORT, :timeout => timeout)
   end
+  
+  def self.version; Convex::Version::STRING; end
 end
 
 CONVEX_ROOT = Convex::ROOT_PATH
