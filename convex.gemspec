@@ -5,11 +5,11 @@
 
 Gem::Specification.new do |s|
   s.name = %q{convex}
-  s.version = "1.8.0.0"
+  s.version = "1.9.0.0"
 
   s.required_rubygems_version = Gem::Requirement.new(">= 0") if s.respond_to? :required_rubygems_version=
   s.authors = ["Sherr\303\263d Faulks"]
-  s.date = %q{2010-11-28}
+  s.date = %q{2011-01-12}
   s.description = %q{Convex is a semantic conversation extractor. It uses the OpenCalais service to understand documents and generate a flurry of information which is stored and manipulated in novel ways by Convex and its lenses.}
   s.email = %q{dev@styledon.com}
   s.executables = ["chronosd", "convexd"]
@@ -22,7 +22,6 @@ Gem::Specification.new do |s|
      "LICENSE",
      "README",
      "Rakefile",
-     "VERSION",
      "bin/chronosd",
      "bin/convexd",
      "config.ru",
