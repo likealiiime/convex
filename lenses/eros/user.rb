@@ -7,10 +7,8 @@ module Convex
   
       def initialize(id); @id = id; end
       
-      def topics; @topics ||= redis_topics; end
-      def count; topics.count end
-      def topics!; @topics = redis_topics; end
-      def count!; topics!.count; end
+      def topics(n=0); @topics ||= redis_topics(n); end
+      def topics!(n=0); @topics = redis_topics(n); end
       
       def ratings; @ratings ||= redis_ratings; end
       def ratings!; @ratings = redis_ratings; end
@@ -24,7 +22,7 @@ module Convex
         #puts "Opponent (##{opp.id}) has #{opp.topics.count} topics"
         
         start = Time.now
-        topic_union = self.topics | opp.topics
+        topic_union = self.topics(300) | opp.topics(300)
         n = topic_union.length
         #puts "N = #{n}"
         #p topic_union
@@ -175,7 +173,10 @@ module Convex
         Hash[ids.zip(ids.collect { |i| Convex.db.zscore(key, i).to_f })]
       end
       
-      def redis_topics; Convex.db.smembers Convex::Eros::Lens.redis_key_for_user_topics(id); end
+      # This gives us the most recent n topics; all when n is unspecified
+      def redis_topics(n=0)
+        Convex.db.zrevrange redis_topics_key, 0, n - 1
+      end
       
       def redis_word_counts
         key = Convex::Eros::Lens.redis_key_for_user_word_counts(self.id)
@@ -183,7 +184,7 @@ module Convex
         Hash[words.zip(words.collect { |i| Convex.db.zscore(key, i).to_i })]
       end
       
-      def to_s; "##{self.id}/#{self.count}"; end
+      def to_s; "##{self.id}"; end
       alias :inspect :to_s
     end
   end
