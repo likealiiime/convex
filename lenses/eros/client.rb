@@ -53,11 +53,11 @@ def perform_mass(method)
   begin
     Convex::Eros::Lens.send("#{method}_all!".to_sym)
   rescue
-    message.subject = "#{name.capitalize} FAILED!"
+    message.subject = "#{name.capitalize} FAILED because: #{$!.message}"
     failure = "\n\n<p><strong>#{$!}</strong></p>" << "<ul>" << $!.backtrace.collect { |line| "<li>#{line}</li>" }.join("\n") << "</ul>"
   end
   
-  email(name.capitalize + (failure ? ' complete' : ' FAILED!')) {
+  email(name.capitalize + (failure ? ' FAILED!' : ' complete')) {
     minutes = (Time.now - start) / 60.0
     time = "%d hours %.1f minutes" % [minutes / 60.0, minutes % 60.0]
     "<p>#{name.capitalize} of #{Convex::Eros::Lens.count} users #{failure ? 'FAILED' : 'completed'} after #{time}</p>" << failure.to_s
