@@ -90,6 +90,8 @@ module Convex
       
       def self.update_word_counts_using_words_for_user_id(words, id)
         key = redis_key_for_user_word_counts(id)
+        # We iterate over words because the word_counts key is a zset, which does not accept
+        # dupes. If we blindly took the # words, the count would be off due to dupes.
         words.each { |word| Convex.db.zincrby(key, 1, word) }
         info("Updated #{words.count} word counts for ##{id}")
       end
@@ -298,6 +300,14 @@ module Convex
       end
       
       ### Ranking ###
+      def self.best_n_ids_for_id(n, my_id, options={})
+        key = redis_key_for_user_similarities(my_id)
+        Convex.db.zrevrange(key, 0, n).collect { |match_id|
+          next if match_id == my_id
+          match_id.to_i
+        }.compact
+      end
+      
       def self.best_n_ids_and_scores_for_id(n, my_id, options={})
         key = send("redis_key_for_user_#{options[:method] || 'similarities'}".to_sym, my_id)
         cast = options[:integerize_ids] ? :to_i : :to_s
