@@ -6,7 +6,7 @@ module Convex
       
       ### Redis ###
       def self.redis_key_for_user_set(id); "lens-eros-#{id}"; end
-      def self.redis_key_for_user_topics(id); "lens-eros-#{id}_topics"; end # Set
+      def self.redis_key_for_user_topics(id); "lens-eros-#{id}_chronological_topics"; end # ZSet
       def self.redis_key_for_user_words(id); "lens-eros-#{id}_words"; end # List
       def self.redis_key_for_user_word_counts(id); "lens-eros-#{id}_word_counts"; end # ZSet
       def self.redis_key_for_user_ratings(id); "lens-eros-#{id}_test_rank"; end # ZSet
@@ -143,6 +143,7 @@ module Convex
         start = Time.now
         ids = all_user_ids
         ids.each do |user_id|
+          Convex.db.del "lens-eros-#{user_id}_topics"
           Convex.db.del redis_key_for_user_topics(user_id)
           theme!(user_id)
         end
@@ -158,13 +159,13 @@ module Convex
           store_topic_using_datum datum(datum_id)
           i += 1
         end
-        info("Generated %d topics from %d data for #%d in %.1f seconds" % [Convex.db.scard(redis_key_for_user_topics(my_id)), datum_ids.count, my_id, (Time.now - start)])
+        info("Generated %d topics from %d data for #%d in %.1f seconds" % [Convex.db.zcard(redis_key_for_user_topics(my_id)), datum_ids.count, my_id, (Time.now - start)])
       end
       
       def self.store_topic_using_datum(datum)
         return unless datum.has_id_and_creator?
-        Convex.db.sadd redis_key_for_user_topics(datum.creator_id), datum.topic
-        debug "Stored topic #{datum.topic} using for ##{datum.creator_id}"
+        Convex.db.zadd redis_key_for_user_topics(datum.creator_id), Time.now.utc.to_f, datum.topic
+        debug "Stored topic #{datum.topic} for ##{datum.creator_id}"
       end
       
       ### Ratings ###
@@ -172,7 +173,7 @@ module Convex
         start = Time.now
         me = Convex::Eros::User.new(my_id)
         users = { my_id => me }
-        ids = self.all_user_ids
+        ids = self.all_user_ids - [my_id.to_s]
         info "Rating #{ids.count} users against #{me}..."
         ids.each do |opp_id|
           begin
