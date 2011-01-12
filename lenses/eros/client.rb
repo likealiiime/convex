@@ -163,7 +163,20 @@ elsif ARGV.first == 'theme!'
   Convex::Eros::Lens.theme!(ARGV.shift)
 elsif ARGV.first == 'theme_all!'
   perform_mass :theme
-
+elsif ARGV.first == 'theme_average'
+  ARGV.shift
+  min, min_id, max, max_id = (1.0/0), 0, (-1.0/0), 0 # 1.0/0 == +infinity
+  counts = Convex::Eros::Lens.all_user_ids.collect { |id|
+    count = Convex.db.zcard Convex::Eros::Lens.redis_key_for_user_topics(id)
+    if count < min; min, min_id = count, id; end
+    if count > max; max, max_id = count, id; end
+    count
+  }
+  avg = counts.reduce(:+) / counts.length
+  puts "Lowest:  #{min} by ##{min_id}"
+  puts "Highest: #{max} by ##{max_id}"
+  puts "Average: #{avg} topics over #{counts.length} users"
+  
 ### Ranking ###
 elsif ARGV.first == 'best'
   ARGV.shift
