@@ -173,6 +173,20 @@ elsif ARGV.first == 'bestx'
   ARGV.shift
   my_id = ARGV.shift
   puts_ordered_ids_and_scores Convex::Eros::Lens.best_n_ids_and_scores_for_id(10, my_id, :excluding => ARGV), "User has not been evaluated!"
+elsif ARGV.first == 'post_all_bests'
+  ARGV.shift
+  n, url, map = ARGV.shift.to_i, ARGV.shift, {}
+  Convex::Eros::Lens.all_user_ids.each { |id| map[id] = Convex::Eros::Lens.best_n_ids_for_id(n, id) }
+  json = map.to_json
+  response = HTTParty.put(url,  { :body => { :json => json } })
+  if response.code == 200
+    Convex::Eros::Lens.info("POSTed #{map.count * n} recommendations for #{map.count} users to #{url} in %.1fK JSON" % (json.length / 1024.0))
+  else
+    email('Could not POST all bests') {
+      "To #{url}.<br/>Response was #{response.code}:<br/><pre><code>#{response.body}</code></pre>"
+    }
+  end
+  
 elsif ARGV.first == 'most'
   ARGV.shift
   puts_ordered_ids_and_numbers Convex::Eros::Lens.n_ids_and_counts_with_most_data(10)
