@@ -11,28 +11,33 @@ Convex.boot!
 #ARGV.shift
 Postmark.api_key = "782667ec-e8dc-4c6d-a225-7432cc3451e4" if defined? Postmark
 
+def email(subject)
+  message = TMail::Mail.new
+  message.from = %w(general@styledon.com)
+  message.to = %w(dev@styledon.com)
+  message.content_type = 'text/html'
+  message.tag = 'convex/eros/client'
+  message.subject = subject
+  message.body = yield
+  Convex.info "Convex::Eros::Client: #{message.subject}\n#{message.body}"
+  begin
+    Postmark.send_through_postmark(message)
+  rescue
+    Convex.warn "Convex::Eros::Client: Failed to send email: #{$!}"
+  end
+end
+
 def perform_mass_index!
   start = Time.now
   Convex::Eros::Lens.info("Beginning re-index (theme->term+wcount->rate->evaluate)...")
   %w(theme term rate evaluate).each do |action|
     perform_mass action
   end
-  minutes = (Time.now - start) / 60.0
-  body = "In %d hours %.1f minutes" % [minutes / 60.0, minutes % 60.0]
   
-  Convex::Eros::Lens.info("Re-index completed #{body.downcase}")
-  message               = TMail::Mail.new
-  message.from          = %w(general@styledon.com)
-  message.to            = %w(dev@styledon.com)
-  message.content_type  = "text/html"
-  message.tag           = "convex/eros/client"
-  message.subject       = "Re-index complete"
-  message.body          = body
-  begin
-    Postmark.send_through_postmark(message)
-  rescue
-    Convex::Eros::Lens.warn("Failed to send email: #{$!}")
-  end
+  email('Re-index complete') {
+    minutes = (Time.now - start) / 60.0
+    "In %d hours %.1f minutes" % [minutes / 60.0, minutes % 60.0]
+  }
 end
 
 def perform_mass(method)
@@ -43,28 +48,20 @@ def perform_mass(method)
   message.tag           = "convex/eros/client"
   
   name = method.to_s.split('_').first
-  start, failure = Time.now, false
+  start, failure = Time.now, nil
   Convex::Eros::Lens.info("Beginning #{name}...")
   begin
     Convex::Eros::Lens.send("#{method}_all!".to_sym)
-    message.subject = "#{name.capitalize} complete"
   rescue
     message.subject = "#{name.capitalize} FAILED!"
-    Convex::Eros::Lens.warn("Convex::Eros::Lens.#{method}_all! failed because: #{$!}\n\n" << $!.backtrace.join("\n"))
     failure = "\n\n<p><strong>#{$!}</strong></p>" << "<ul>" << $!.backtrace.collect { |line| "<li>#{line}</li>" }.join("\n") << "</ul>"
   end
-  minutes = (Time.now - start) / 60.0
-  time = "%d hours %.1f minutes" % [minutes / 60.0, minutes % 60.0]
-  body = "#{name.capitalize} of #{Convex::Eros::Lens.count} users #{failure ? 'FAILED' : 'completed'} after #{time}"
-  Convex::Eros::Lens.info(body)
-  message.body = "<p>#{body}</p>"
-  message.body << failure if failure
-  begin
-    Postmark.send_through_postmark(message)
-    Convex::Eros::Lens.debug("Sent email to #{message.to.join(', ')}")
-  rescue
-    Convex::Eros::Lens.warn("Failed to send email: #{$!}")
-  end
+  
+  email(name.capitalize + (failure ? ' complete' : ' FAILED!')) {
+    minutes = (Time.now - start) / 60.0
+    time = "%d hours %.1f minutes" % [minutes / 60.0, minutes % 60.0]
+    "<p>#{name.capitalize} of #{Convex::Eros::Lens.count} users #{failure ? 'FAILED' : 'completed'} after #{time}</p>" << failure.to_s
+  }
 end
 
 def puts_ordered_ids_and_numbers(set, no_data_message="There does not seem to be enough data!")
